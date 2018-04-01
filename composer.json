@@ -11,7 +11,10 @@
     "autoload": {
         "psr-4": {
             "iqb\\": "src/"
-        }
+        },
+        "files": [
+            "src/zip/functions.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
