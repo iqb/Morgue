@@ -7,22 +7,58 @@ use iqb\zip\EndOfCentralDirectory;
 
 class ZipArchive
 {
-    /// @var int
+    /**
+     * Ignore case on name lookup
+     * @link http://php.net/manual/en/zip.constants.php
+     */
+    const FL_NOCASE = 1;
+
+    /**
+     * Ignore directory component
+     * @link http://php.net/manual/en/zip.constants.php
+     */
+    const FL_NODIR = 2;
+
+    /**
+     * Read compressed data
+     * @link http://php.net/manual/en/zip.constants.php
+     */
+    const FL_COMPRESSED = 4;
+
+    /**
+     * Use original data, ignoring changes.
+     * @link http://php.net/manual/en/zip.constants.php
+     */
+    const FL_UNCHANGED = 8;
+
+    /**
+     * @var int
+     */
     public $numFiles;
 
-    /// @var string
+    /**
+     * @var string
+     */
     public $comment;
 
-    /// @var resource
+    /**
+     * @var resource
+     */
     private $handle;
 
-    /// @var CentralDirectoryHeader[]
+    /**
+     * @var CentralDirectoryHeader[]
+     */
     public $originalCentralDirectory = [];
 
-    /// @var array(string => int)
+    /**
+     * @var array(string => int)
+     */
     public $originalCentralDirectoryNameToIndexMapping = [];
 
-    /// @var EndOfCentralDirectory
+    /**
+     * @var EndOfCentralDirectory
+     */
     public $originalEndOfCentralDirectory;
 
 
@@ -109,5 +145,34 @@ class ZipArchive
             'comp_method' => $entry->compressionMethod,
             'encryption_method' => 0,
         ];
+    }
+
+
+    final public function statName(string $name, int $flags = 0)
+    {
+        $ignoreCase = (($flags & self::FL_NOCASE) !== 0);
+        $ignoreDir = (($flags & self::FL_NODIR) !== 0);
+
+        if (!$ignoreCase && !$ignoreDir && isset($this->originalCentralDirectoryNameToIndexMapping[$name])) {
+            return $this->statIndex($this->originalCentralDirectoryNameToIndexMapping[$name]);
+        }
+
+        $name = ($ignoreCase ? \strtolower($name) : $name);
+
+        foreach ($this->originalCentralDirectory as $possibleIndex => $possibleEntry) {
+            if ($ignoreDir && $possibleEntry->isDirectory()) {
+                continue;
+            }
+
+            $entryName = $possibleEntry->fileName;
+            $entryName = ($ignoreCase ? \strtolower($entryName) : $entryName);
+            $entryName = ($ignoreDir ? \basename($entryName) : $entryName);
+
+            if ($name === $entryName) {
+                return $this->statIndex($possibleIndex);
+            }
+        }
+
+        return false;
     }
 }

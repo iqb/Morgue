@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
 
 class ZipArchiveTest extends TestCase
 {
+    private $zipFileNoExtras = 'test-no-extras.zip';
+
+
     public function setUp()
     {
         parent::setUp();
@@ -17,20 +20,75 @@ class ZipArchiveTest extends TestCase
         \putenv("TZ=UTC");
     }
 
-
-    public function testStatIndex()
+    public function testZipArchive()
     {
         $fromExt = new \ZipArchive();
-        $fromExt->open('test-no-extras.zip');
+        $fromExt->open($this->zipFileNoExtras);
 
         $fromPkg = new ZipArchive();
-        $fromPkg->open('test-no-extras.zip');
+        $fromPkg->open($this->zipFileNoExtras);
 
         $this->assertSame($fromExt->numFiles, $fromPkg->numFiles);
         $this->assertSame($fromExt->comment, $fromPkg->comment);
+    }
+
+
+    public function noExtrasIndexProvider()
+    {
+        $return = [];
+
+        $fromExt = new \ZipArchive();
+        $fromExt->open($this->zipFileNoExtras);
 
         for ($i=0; $i<$fromExt->numFiles; $i++) {
-            $this->assertEquals($fromExt->statIndex($i), $fromPkg->statIndex($i));
+            $return[]  = [$i, $fromExt->statIndex($i)['name']];
         }
+
+        return $return;
+    }
+
+    /**
+     * Tests statIndex() on unmodified zip file.
+     * @dataProvider noExtrasIndexProvider
+     */
+    public function testStatUnmodified(int $index, string $name)
+    {
+        $fromExt = new \ZipArchive();
+        $fromExt->open($this->zipFileNoExtras);
+
+        $fromPkg = new ZipArchive();
+        $fromPkg->open($this->zipFileNoExtras);
+
+        $this->assertEquals($fromExt->statIndex($index), $fromPkg->statIndex($index), "Testing: $name");
+    }
+
+    /**
+     * Tests statName() on unmodified zip file.
+     * @dataProvider noExtrasIndexProvider
+     */
+    public function testStatNameUnmodified(int $index, string $name)
+    {
+        $fromExt = new \ZipArchive();
+        $fromExt->open($this->zipFileNoExtras);
+
+        $fromPkg = new ZipArchive();
+        $fromPkg->open($this->zipFileNoExtras);
+
+        $this->assertEquals($fromExt->statName($name), $fromPkg->statName($name));
+
+        $this->assertEquals($fromExt->statName($name, \ZipArchive::FL_NOCASE), $fromPkg->statName($name, ZipArchive::FL_NOCASE));
+        $this->assertEquals($fromExt->statName(\strtolower($name), \ZipArchive::FL_NOCASE), $fromPkg->statName(\strtolower($name), ZipArchive::FL_NOCASE));
+        $this->assertEquals($fromExt->statName(\strtoupper($name), \ZipArchive::FL_NOCASE), $fromPkg->statName(\strtoupper($name), ZipArchive::FL_NOCASE));
+
+        $basename = \basename($name);
+        $this->assertEquals($fromExt->statName($name, \ZipArchive::FL_NODIR), $fromPkg->statName($name, ZipArchive::FL_NODIR), 'Getting: ' . $name);
+        $this->assertEquals($fromExt->statName($basename, \ZipArchive::FL_NODIR), $fromPkg->statName($basename, ZipArchive::FL_NODIR), 'Getting: ' . $basename);
+
+        $this->assertEquals($fromExt->statName($name, \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->statName($name, ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertEquals($fromExt->statName(\strtolower($name), \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->statName(\strtolower($name), ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertEquals($fromExt->statName(\strtoupper($name), \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->statName(\strtoupper($name), ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertEquals($fromExt->statName($basename, \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->statName($basename, ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertEquals($fromExt->statName(\strtolower($basename), \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->statName(\strtolower($basename), ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertEquals($fromExt->statName(\strtoupper($basename), \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->statName(\strtoupper($basename), ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
     }
 }
