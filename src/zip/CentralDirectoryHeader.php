@@ -6,7 +6,20 @@ class CentralDirectoryHeader
 {
     const SIGNATURE = 0x504b0102;
 
+    /// Minimum length of this entry if neither file name, extra field nor file comment are set
     const MIN_LENGTH = 46;
+
+    /// Maximum length of this entry file name, extra field and file comment have the maximum allowed length
+    const MAX_LENGTH = self::MIN_LENGTH + self::FILE_NAME_MAX_LENGTH + self::EXTRA_FIELD_MAX_LENGTH + self::FILE_COMMENT_MAX_LENGTH;
+
+    /// File name can not be longer than this (the length field has only 2 bytes)
+    const FILE_NAME_MAX_LENGTH = (255 * 255) - 1;
+
+    /// Extra field can not be longer than this (the length field has only 2 bytes)
+    const EXTRA_FIELD_MAX_LENGTH = (255 * 255) - 1;
+
+    /// File comment can not be longer than this (the length field has only 2 bytes)
+    const FILE_COMMENT_MAX_LENGTH = (255 * 255) - 1;
 
     /// @var int
     public $versionMadeBy;

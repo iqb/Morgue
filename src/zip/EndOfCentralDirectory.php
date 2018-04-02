@@ -6,7 +6,14 @@ class EndOfCentralDirectory
 {
     const SIGNATURE = 0x504b0506;
 
+    /// Minimum length of this entry if zip file comment is empty
     const MIN_LENGTH = 22;
+
+    /// Maximum length of this entry if zip file comment has the maximum length
+    const MAX_LENGTH = self::MIN_LENGTH + self::ZIP_FILE_COMMENT_MAX_LENGTH;
+
+    /// The zip file comment can not be longer than this (the length field has only 2 bytes)
+    const ZIP_FILE_COMMENT_MAX_LENGTH = (255 * 255) - 1;
 
     public $numberOfThisDisk;
 
