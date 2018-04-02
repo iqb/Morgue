@@ -3,14 +3,16 @@
 namespace iqb\zip;
 
 /**
- * Convert dos date and time values to a \DateTimeInterface object
+ * Convert dos date and time values to a \DateTimeInterface object.
+ * DOS times are stored as local time values (not UTC), so use the supplied timezone (defaults to \date_default_timezone_get()).
  *
  * @param int $dosTime
  * @param int $dosDate
+ * @param string $timezone
  * @return \DateTimeInterface
  * @throws \Exception
  */
-function dos2DateTime(int $dosTime, int $dosDate) : \DateTimeInterface
+function dos2DateTime(int $dosTime, int $dosDate, string $timezone = null) : \DateTimeInterface
 {
     // Bits 0-4: seconds / 2
     $seconds = (($dosTime & 0x1F) << 1);
@@ -26,8 +28,9 @@ function dos2DateTime(int $dosTime, int $dosDate) : \DateTimeInterface
     // Bits 9-15: year - 1980
     $year = (($dosDate >> 9) & 0x7F) + 1980;
 
-    return new \DateTimeImmutable("$year-$month-$day $hours:$minutes:$seconds", new \DateTimeZone('UTC'));
+    return new \DateTimeImmutable("$year-$month-$day $hours:$minutes:$seconds", new \DateTimeZone($timezone ? $timezone : \date_default_timezone_get()));
 }
+
 
 /**
  * Create dos time and date integers from datetime object.
@@ -37,34 +40,38 @@ function dos2DateTime(int $dosTime, int $dosDate) : \DateTimeInterface
  */
  function dateTime2Dos(\DateTimeInterface $datetime) : array
 {
-    /* @var $datetime \DateTimeImmutable */
-    $date = \getdate($datetime->setTimezone(new \DateTimeZone('UTC'))->getTimestamp());
+    $year =(int)$datetime->format('Y');
+    $month =(int)$datetime->format('n');
+    $day =(int)$datetime->format('j');
+    $hour =(int)$datetime->format('G');
+    $minute =(int)$datetime->format('i');
+    $second =(int)$datetime->format('s');
 
-    if (($date['year'] === 1979) && ($date['mon'] === 11) && ($date['mday'] === 30)) {
-        $date['mday'] = 0;
-        $date['mon'] = 0;
-        $date['year'] = 1980;
+    if (($year === 1979) && ($month === 11) && ($day === 30)) {
+        $day = 0;
+        $month = 0;
+        $year = 1980;
     }
 
-    elseif (($date['year'] === 1979) && ($date['mon'] === 12)) {
-        $date['mon'] = 0;
-        $date['year'] = 1980;
+    elseif (($year === 1979) && ($month === 12)) {
+        $month = 0;
+        $year = 1980;
     }
 
-    elseif ($date['year'] < 1980) {
+    elseif ($year < 1980) {
         throw new \InvalidArgumentException("DOS date and time can not represent dates before 1979-11-30");
     }
 
     $dosTime =
-        ($date['seconds'] >> 1)
-        + ($date['minutes'] << 5)
-        + ($date['hours'] << 11)
+        ($second >> 1)
+        + ($minute << 5)
+        + ($hour << 11)
     ;
 
     $dosDate =
-        $date['mday']
-        + ($date['mon'] << 5)
-        + (($date['year'] - 1980) << 9)
+        $day
+        + ($month << 5)
+        + (($year - 1980) << 9)
     ;
 
     return [$dosTime, $dosDate, 'time' => $dosTime, 'date' => $dosDate];

@@ -20,7 +20,7 @@ class FunctionsTest extends TestCase
     public function testDos2DateTime()
     {
         foreach ($this->cases as list($dosTime, $dosDate, $datetime)) {
-            $this->assertEquals(dos2DateTime($dosTime, $dosDate), new \DateTimeImmutable($datetime, new \DateTimeZone('UTC')));
+            $this->assertEquals(new \DateTimeImmutable($datetime), dos2DateTime($dosTime, $dosDate));
         }
     }
 
@@ -32,7 +32,7 @@ class FunctionsTest extends TestCase
         foreach ($this->cases as $caseIndex => list($dosTime, $dosDate)) {
             for ($i=2; $i<\count($this->cases[$caseIndex]); $i++) {
                 $datetime = $this->cases[$caseIndex][$i];
-                $this->assertEquals(DateTime2dos(new \DateTimeImmutable($datetime, new \DateTimeZone('UTC'))), [
+                $this->assertEquals(DateTime2dos(new \DateTimeImmutable($datetime)), [
                     $dosTime,
                     $dosDate,
                     'time' => $dosTime,
