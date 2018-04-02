@@ -21,67 +21,145 @@ class CentralDirectoryHeader
     /// File comment can not be longer than this (the length field has only 2 bytes)
     const FILE_COMMENT_MAX_LENGTH = (255 * 255) - 1;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $versionMadeBy;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $versionNeededToExtract;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $generalPurposeBitFlags;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $compressionMethod;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $lastModificationFileTime;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $lastModificationFileDate;
 
-    /// @var \DateTimeInterface
-    public $lastModification;
-
-    /// @var int
+    /**
+     * @var int
+     */
     public $crc32;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $compressedSize;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $uncompressedSize;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $fileNameLength;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $extraFieldLength;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $fileCommentLength;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $diskNumberStart;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $internalFileAttributes;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $externalFileAttributes;
 
-    /// @var int
+    /**
+     * @var int
+     */
     public $relativeOffsetOfLocalHeader;
 
-    /// @var string
+    /**
+     * @var string
+     */
     public $fileName;
 
-    /// @var string
+    /**
+     * @var string
+     */
     public $extraField;
 
-    /// @var string
+    /**
+     * @var string
+     */
     public $fileComment;
 
-    /// @var int
+    /**
+     * File system or operating system of encoder.
+     * One of the HOST_COMPATIBILITY_* constants.
+     * @var int
+     */
+    public $encodingHost;
+
+    /**
+     * Maximum supported version of the encoding software.
+     * @var int
+     */
+    public $encodingVersion;
+
+    /**
+     * Required host compatibility to decode.
+     * One of the HOST_COMPATIBILITY_* constants.
+     * @var int
+     */
+    public $requiredHost;
+
+    /**
+     * Zip format version required to decode.
+     * @var int
+     */
+    public $requiredVersion;
+
+    /**
+     * @var \DateTimeInterface
+     */
+    public $lastModification;
+
+    /**
+     * @var int
+     */
+    public $dosExternalAttributes;
+
+    /**
+     * @var int
+     */
+    public $unixExternalAttributes;
+
+    /**
+     * @var int
+     */
     public $requireAdditionalData;
 
 
@@ -129,6 +207,17 @@ class CentralDirectoryHeader
         if ($fileComment !== null) {
             $this->fileComment = $fileComment;
             $this->fileCommentLength = \strlen($fileComment);
+        }
+
+        $this->encodingHost = ($this->versionMadeBy >> 8);
+        $this->encodingVersion = ($this->versionMadeBy & 255);
+        $this->requiredHost = ($this->versionNeededToExtract >> 8);
+        $this->requiredVersion = ($this->versionNeededToExtract & 255);
+
+        $this->dosExternalAttributes = ($this->externalFileAttributes & 255);
+
+        if ($this->encodingHost === HOST_COMPATIBILITY_UNIX) {
+            $this->unixExternalAttributes = ($this->externalFileAttributes >> 16);
         }
     }
 
@@ -216,5 +305,16 @@ class CentralDirectoryHeader
         $this->requireAdditionalData = null;
 
         return $this->fileNameLength + $this->extraFieldLength + $this->fileCommentLength;
+    }
+
+
+    /**
+     * Whether this entry represents a directory or not
+     *
+     * @return bool
+     */
+    public function isDirectory() : bool
+    {
+        return (($this->dosExternalAttributes & DOS_ATTRIBUTE_DIRECTORY) !== 0);
     }
 }
