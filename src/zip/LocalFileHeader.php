@@ -23,6 +23,9 @@ class LocalFileHeader
     /// @var int
     public $lastModificationFileTime;
 
+    /// @var \DateTimeInterface
+    public $lastModification;
+
     /// @var int
     public $crc32;
 
@@ -65,6 +68,7 @@ class LocalFileHeader
         $this->compressionMethod = $compressionMethod;
         $this->lastModificationFileTime = $lastModificationFileTime;
         $this->lastModificationFileDate = $lastModificationFileDate;
+        $this->lastModification = dos2DateTime($this->lastModificationFileTime, $this->lastModificationFileDate);
         $this->compressedSize = $compressedSize;
         $this->uncompressedSize = $uncompressedSize;
 

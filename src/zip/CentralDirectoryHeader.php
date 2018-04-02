@@ -26,6 +26,10 @@ class CentralDirectoryHeader
     /// @var int
     public $lastModificationFileDate;
 
+    /// @var \DateTimeInterface
+    public $lastModification;
+
+    /// @var int
     public $crc32;
 
     /// @var int
@@ -92,6 +96,7 @@ class CentralDirectoryHeader
         $this->compressionMethod = $compressionMethod;
         $this->lastModificationFileTime = $lastModificationFileTime;
         $this->lastModificationFileDate = $lastModificationFileDate;
+        $this->lastModification = dos2DateTime($this->lastModificationFileTime, $this->lastModificationFileDate);
         $this->crc32 = $crc32;
         $this->compressedSize = $compressedSize;
         $this->uncompressedSize = $uncompressedSize;
