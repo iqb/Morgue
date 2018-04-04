@@ -47,6 +47,38 @@ class ZipArchiveTest extends TestCase
         return $return;
     }
 
+
+    /**
+     * Tests statName() on unmodified zip file.
+     * @dataProvider noExtrasIndexProvider
+     */
+    public function testLocateNameUnmodified(int $index, string $name)
+    {
+        $fromExt = new \ZipArchive();
+        $fromExt->open($this->zipFileNoExtras);
+
+        $fromPkg = new ZipArchive();
+        $fromPkg->open($this->zipFileNoExtras);
+
+        $this->assertSame($fromExt->locateName($name), $fromPkg->locateName($name));
+
+        $this->assertSame($fromExt->locateName($name, \ZipArchive::FL_NOCASE), $fromPkg->locateName($name, ZipArchive::FL_NOCASE));
+        $this->assertSame($fromExt->locateName(\strtolower($name), \ZipArchive::FL_NOCASE), $fromPkg->locateName(\strtolower($name), ZipArchive::FL_NOCASE));
+        $this->assertSame($fromExt->locateName(\strtoupper($name), \ZipArchive::FL_NOCASE), $fromPkg->locateName(\strtoupper($name), ZipArchive::FL_NOCASE));
+
+        $basename = \basename($name);
+        $this->assertSame($fromExt->locateName($name, \ZipArchive::FL_NODIR), $fromPkg->locateName($name, ZipArchive::FL_NODIR), 'Getting: ' . $name);
+        $this->assertSame($fromExt->locateName($basename, \ZipArchive::FL_NODIR), $fromPkg->locateName($basename, ZipArchive::FL_NODIR), 'Getting: ' . $basename);
+
+        $this->assertSame($fromExt->locateName($name, \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->locateName($name, ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertSame($fromExt->locateName(\strtolower($name), \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->locateName(\strtolower($name), ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertSame($fromExt->locateName(\strtoupper($name), \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->locateName(\strtoupper($name), ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertSame($fromExt->locateName($basename, \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->locateName($basename, ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertSame($fromExt->locateName(\strtolower($basename), \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->locateName(\strtolower($basename), ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+        $this->assertSame($fromExt->locateName(\strtoupper($basename), \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->locateName(\strtoupper($basename), ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
+    }
+
+
     /**
      * Tests statIndex() on unmodified zip file.
      * @dataProvider noExtrasIndexProvider
@@ -61,6 +93,7 @@ class ZipArchiveTest extends TestCase
 
         $this->assertEquals($fromExt->statIndex($index), $fromPkg->statIndex($index), "Testing: $name");
     }
+
 
     /**
      * Tests statName() on unmodified zip file.
@@ -81,8 +114,8 @@ class ZipArchiveTest extends TestCase
         $this->assertEquals($fromExt->statName(\strtoupper($name), \ZipArchive::FL_NOCASE), $fromPkg->statName(\strtoupper($name), ZipArchive::FL_NOCASE));
 
         $basename = \basename($name);
-        $this->assertEquals($fromExt->statName($name, \ZipArchive::FL_NODIR), $fromPkg->statName($name, ZipArchive::FL_NODIR), 'Getting: ' . $name);
-        $this->assertEquals($fromExt->statName($basename, \ZipArchive::FL_NODIR), $fromPkg->statName($basename, ZipArchive::FL_NODIR), 'Getting: ' . $basename);
+        $this->assertEquals($fromExt->statName($name, \ZipArchive::FL_NODIR), $fromPkg->statName($name, ZipArchive::FL_NODIR));
+        $this->assertEquals($fromExt->statName($basename, \ZipArchive::FL_NODIR), $fromPkg->statName($basename, ZipArchive::FL_NODIR));
 
         $this->assertEquals($fromExt->statName($name, \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->statName($name, ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));
         $this->assertEquals($fromExt->statName(\strtolower($name), \ZipArchive::FL_NODIR|\ZipArchive::FL_NOCASE), $fromPkg->statName(\strtolower($name), ZipArchive::FL_NODIR|ZipArchive::FL_NOCASE));

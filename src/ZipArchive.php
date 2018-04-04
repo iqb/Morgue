@@ -123,6 +123,44 @@ class ZipArchive
 
 
     /**
+     * Returns the index of the entry in the archive
+     *
+     * @param string $name The name of the entry to look up
+     * @param int $flags Any combination of ZipArchive::FL_NOCASE|ZipArchive::FL_NODIR
+     * @return int|false
+     *
+     * @link http://php.net/manual/en/ziparchive.locatename.php
+     */
+    final public function locateName(string $name, int $flags = 0)
+    {
+        $ignoreCase = (($flags & self::FL_NOCASE) !== 0);
+        $ignoreDir = (($flags & self::FL_NODIR) !== 0);
+
+        if (!$ignoreCase && !$ignoreDir && isset($this->originalCentralDirectoryNameToIndexMapping[$name])) {
+            return $this->originalCentralDirectoryNameToIndexMapping[$name];
+        }
+
+        $name = ($ignoreCase ? \strtolower($name) : $name);
+
+        foreach ($this->originalCentralDirectory as $possibleIndex => $possibleEntry) {
+            if ($ignoreDir && $possibleEntry->isDirectory()) {
+                continue;
+            }
+
+            $entryName = $possibleEntry->fileName;
+            $entryName = ($ignoreCase ? \strtolower($entryName) : $entryName);
+            $entryName = ($ignoreDir ? \basename($entryName) : $entryName);
+
+            if ($name === $entryName) {
+                return $possibleIndex;
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
      * Get the details of an entry defined by its index
      *
      * @param int $index Index of the entry
@@ -164,27 +202,8 @@ class ZipArchive
      */
     final public function statName(string $name, int $flags = 0)
     {
-        $ignoreCase = (($flags & self::FL_NOCASE) !== 0);
-        $ignoreDir = (($flags & self::FL_NODIR) !== 0);
-
-        if (!$ignoreCase && !$ignoreDir && isset($this->originalCentralDirectoryNameToIndexMapping[$name])) {
-            return $this->statIndex($this->originalCentralDirectoryNameToIndexMapping[$name]);
-        }
-
-        $name = ($ignoreCase ? \strtolower($name) : $name);
-
-        foreach ($this->originalCentralDirectory as $possibleIndex => $possibleEntry) {
-            if ($ignoreDir && $possibleEntry->isDirectory()) {
-                continue;
-            }
-
-            $entryName = $possibleEntry->fileName;
-            $entryName = ($ignoreCase ? \strtolower($entryName) : $entryName);
-            $entryName = ($ignoreDir ? \basename($entryName) : $entryName);
-
-            if ($name === $entryName) {
-                return $this->statIndex($possibleIndex);
-            }
+        if (($index = $this->locateName($name, $flags)) !== false) {
+            return $this->statIndex($index, $flags);
         }
 
         return false;
