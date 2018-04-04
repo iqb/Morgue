@@ -123,10 +123,15 @@ class ZipArchive
 
 
     /**
-     * @param int $index
+     * Get the details of an entry defined by its index
+     *
+     * @param int $index Index of the entry
+     * @param int $flags ZipArchive::FL_UNCHANGED or 0
      * @return array|false
+     *
+     * @link http://php.net/manual/en/ziparchive.statindex.php
      */
-    final public function statIndex(int $index)
+    final public function statIndex(int $index, int $flags = 0)
     {
         if (!isset($this->originalCentralDirectory[$index])) {
             return false;
@@ -148,6 +153,15 @@ class ZipArchive
     }
 
 
+    /**
+     * Get the details of an entry defined by its name
+     *
+     * @param string $name Name of the entry
+     * @param int $flags Any combination of ZipArchive::FL_NOCASE|ZipArchive::FL_NODIR|ZipArchive::FL_UNCHANGED
+     * @return array|false
+     *
+     * @link http://php.net/manual/en/ziparchive.statname.php
+     */
     final public function statName(string $name, int $flags = 0)
     {
         $ignoreCase = (($flags & self::FL_NOCASE) !== 0);
