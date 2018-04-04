@@ -123,6 +123,62 @@ class ZipArchive
 
 
     /**
+     * Returns the Zip archive comment
+     *
+     * @param int $flags ZipArchive::FL_UNCHANGED or 0
+     * @return string|bool
+     *
+     * @link http://php.net/manual/en/ziparchive.getarchivecomment.php
+     */
+    final public function getArchiveComment(int $flags = 0)
+    {
+        if ($this->originalEndOfCentralDirectory->zipFileCommentLength > 0) {
+            return $this->originalEndOfCentralDirectory->zipFileComment;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * Returns the comment of an entry using the entry index.
+     *
+     * @param int $index Index of the entry
+     * @param int $flags ZipArchive::FL_UNCHANGED or 0
+     * @return string|false
+     *
+     * @link http://php.net/manual/en/ziparchive.getcommentindex.php
+     */
+    final public function getCommentIndex(int $index, int $flags = 0)
+    {
+        if (isset($this->originalCentralDirectory[$index])) {
+            return $this->originalCentralDirectory[$index]->fileComment;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * Returns the comment of an entry using the entry name
+     *
+     * @param string $name Name of the entry
+     * @param int $flags ZipArchive::FL_UNCHANGED or 0
+     * @return string|false
+     *
+     * @link http://php.net/manual/en/ziparchive.getcommentname.php
+     */
+    final public function getCommentName(string $name, int $flags = 0)
+    {
+        if (($index = $this->locateName($name, $flags & ZipArchive::FL_UNCHANGED)) !== false) {
+            return $this->getCommentIndex($index, $flags);
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
      * Returns the index of the entry in the archive
      *
      * @param string $name The name of the entry to look up
