@@ -61,7 +61,7 @@ class ZipArchiveTest extends TestCase
         $assertMethod = ($useSame ? 'assertSame' : 'assertEquals');
 
         foreach ($parameterLists as $parameterList) {
-            $this->{$assertMethod}($fromExt->{$testMethod}(...$parameterList), $fromPkg->{$testMethod}(...$parameterList), new ErrorMessage($testMethod, ...$parameterList));
+            $this->{$assertMethod}($fromExt->{$testMethod}(...$parameterList), $fromPkg->{$testMethod}(...$parameterList), new ErrorMessage($testMethod, $parameterList, false));
         }
     }
 
