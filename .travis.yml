@@ -57,9 +57,10 @@ php:
 
 install:
   - composer install
+  - wget -O phpunit https://phar.phpunit.de/phpunit-6.phar
 
 script:
-  - phpunit --coverage-clover=coverage.clover
+  - php phpunit-6.phar --coverage-clover=coverage.clover
 
 after_script:
   - wget https://scrutinizer-ci.com/ocular.phar
