@@ -6,8 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 class ZipArchiveTest extends TestCase
 {
-    private $zipFileNoExtras = 'test-no-extras.zip';
-    private $zipFileComments = 'comments.zip';
+    private $zipFileNoExtras = __DIR__ . '/test-no-extras.zip';
+    private $zipFileComments = __DIR__ . '/comments.zip';
 
 
     public function setUp()
