@@ -2,8 +2,10 @@
 
 namespace iqb;
 
+use iqb\stream\SubStream;
 use iqb\zip\CentralDirectoryHeader;
 use iqb\zip\EndOfCentralDirectory;
+use iqb\zip\LocalFileHeader;
 
 class ZipArchive
 {
@@ -30,6 +32,21 @@ class ZipArchive
      * @link http://php.net/manual/en/zip.constants.php
      */
     const FL_UNCHANGED = 8;
+
+    /**
+     * stored (uncompressed)
+     */
+    const CM_STORE = 0;
+
+    /**
+     * deflate compressed
+     */
+    const CM_DEFLATE = 8;
+
+    /**
+     * BZip2 compressed
+     */
+    const CM_BZIP2 = 12;
 
     /**
      * @var int
@@ -60,6 +77,14 @@ class ZipArchive
      * @var EndOfCentralDirectory
      */
     public $originalEndOfCentralDirectory;
+
+
+    public function __construct()
+    {
+        if (!\in_array(SubStream::SCHEME, \stream_get_wrappers())) {
+            \stream_wrapper_register(SubStream::SCHEME, SubStream::class);
+        }
+    }
 
 
     public function open(string $filename)
@@ -173,6 +198,84 @@ class ZipArchive
         if (($index = $this->locateName($name, $flags & ZipArchive::FL_UNCHANGED)) !== false) {
             return $this->getCommentIndex($index, $flags);
         } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * @param int $index Index of the entry
+     * @param int $length The length to be read from the entry. If 0, then the entire entry is read.
+     * @param int $flags Any combination of ZipArchive::FL_UNCHANGED|ZipArchive::FL_COMPRESSED
+     * @return string|false
+     */
+    final public function getFromIndex(int $index, int $length = 0, int $flags = 0)
+    {
+        if (($stream = $this->getStreamIndex($index, $flags)) === false) {
+            return false;
+        }
+
+        $string = '';
+        do {
+            $chunkSize = ($length ? $length - \strlen($string) : 8192);
+            if (($chunk = \fread($stream, $chunkSize)) !== false) {
+                $string .= $chunk;
+            } else {
+                break;
+            }
+        } while (!\feof($stream) && ($length === 0 || \strlen($string) < $length));
+
+        return $string;
+    }
+
+
+    /**
+     * Get a file handle to the entry defined by its index (read only)
+     *
+     * @param int $index
+     * @param int $flags
+     * @return resource|false
+     */
+    final public function getStreamIndex(int $index, int $flags = 0)
+    {
+        if (!isset($this->originalCentralDirectory[$index])) {
+            return false;
+        } else {
+            $entry = $this->originalCentralDirectory[$index];
+        }
+
+        if ($entry->compressedSize === 0) {
+            return false;
+        }
+
+        \fseek($this->handle, $entry->relativeOffsetOfLocalHeader);
+        $localHeader = LocalFileHeader::parse(\fread($this->handle, LocalFileHeader::MIN_LENGTH));
+        if ($localHeader->requireAdditionalData) {
+            $localHeader->parseAdditionalData(\fread($this->handle, $localHeader->requireAdditionalData));
+        }
+
+        $offset = \ftell($this->handle);
+        $length = $entry->compressedSize;
+
+        if (($handle = \fopen(SubStream::SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->handle, 'r')) === false) {
+            return false;
+        }
+
+        if (($entry->compressionMethod === self::CM_STORE) || ($flags & self::FL_COMPRESSED)) {
+            return $handle;
+        }
+
+        elseif ($entry->compressionMethod === self::CM_DEFLATE) {
+            \stream_filter_append($handle, 'zlib.inflate', \STREAM_FILTER_READ);
+            return $handle;
+        }
+
+        elseif ($entry->compressionMethod === self::CM_BZIP2) {
+            \stream_filter_append($handle, 'bzip2.decompress', \STREAM_FILTER_READ);
+            return $handle;
+        }
+
+        else {
             return false;
         }
     }
