@@ -23,9 +23,11 @@
         }
     },
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.0",
+        "ext-zlib": "*"
     },
     "require-dev": {
+        "ext-zip": "*",
         "phpunit/phpunit": "^6.3"
     }
 }
