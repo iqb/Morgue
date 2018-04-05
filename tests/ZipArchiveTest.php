@@ -173,6 +173,23 @@ class ZipArchiveTest extends TestCase
 
 
     /**
+     * @dataProvider noExtrasZipFileProvider
+     */
+    public function testGetFromName(string $fileName, int $index, string $name)
+    {
+        $this->compareMethodResults($fileName, 'getFromName', [
+            [$name],
+            [$name, 64],
+            [$name, 64, \ZipArchive::FL_COMPRESSED],
+            [$name, 600],
+            [$name, 600, \ZipArchive::FL_COMPRESSED],
+            [$name, 100000],
+            [$name, 100000, \ZipArchive::FL_COMPRESSED],
+        ], false);
+    }
+
+
+    /**
      * Tests statName() on unmodified zip file.
      * @dataProvider noExtrasZipFileProvider
      */

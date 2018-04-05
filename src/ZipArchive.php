@@ -204,10 +204,14 @@ class ZipArchive
 
 
     /**
+     * Returns the entry contents using its index
+     *
      * @param int $index Index of the entry
      * @param int $length The length to be read from the entry. If 0, then the entire entry is read.
      * @param int $flags Any combination of ZipArchive::FL_UNCHANGED|ZipArchive::FL_COMPRESSED
      * @return string|false
+     *
+     * @link http://php.net/manual/en/ziparchive.getfromindex.php
      */
     final public function getFromIndex(int $index, int $length = 0, int $flags = 0)
     {
@@ -226,6 +230,26 @@ class ZipArchive
         } while (!\feof($stream) && ($length === 0 || \strlen($string) < $length));
 
         return $string;
+    }
+
+
+    /**
+     * Returns the entry contents using its name
+     *
+     * @param string $name Name of the entry
+     * @param int $length The length to be read from the entry. If 0, then the entire entry is read.
+     * @param int $flags Any combination of ZipArchive::FL_UNCHANGED|ZipArchive::FL_COMPRESSED|ZipArchive::FL_NOCASE
+     * @return bool
+     *
+     * @link http://php.net/manual/en/ziparchive.getfromname.php
+     */
+    final public function getFromName(string $name, int $length = 0, int $flags = 0)
+    {
+        if (($index = $this->locateName($name, $flags & (self::FL_UNCHANGED|self::FL_NOCASE))) === false) {
+            return false;
+        }
+
+        return $this->getFromIndex($index, $length, $flags & (self::FL_UNCHANGED|self::FL_COMPRESSED));
     }
 
 
