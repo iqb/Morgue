@@ -20,13 +20,9 @@ class SubStreamTest extends TestCase
             throw new \RuntimeException('Setup failed!: ' . $bytesWritten);
         }
 
-        \stream_wrapper_register(SubStream::SCHEME, SubStream::class);
-    }
-
-
-    public function tearDown()
-    {
-        \stream_wrapper_unregister(SubStream::SCHEME);
+        if (!\in_array(SubStream::SCHEME, \stream_get_wrappers())) {
+            \stream_wrapper_register(SubStream::SCHEME, SubStream::class);
+        }
     }
 
 
