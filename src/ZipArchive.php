@@ -782,7 +782,7 @@ class ZipArchive
         /* @var $entry CentralDirectoryHeader */
         $entry = $this->originalCentralDirectory[$index];
 
-        return [
+        $stat = [
             'name' => $entry->fileName,
             'index' => $index,
             'crc' => $entry->crc32,
@@ -790,8 +790,13 @@ class ZipArchive
             'mtime' => $entry->lastModification->getTimestamp(),
             'comp_size' => $entry->compressedSize,
             'comp_method' => $entry->compressionMethod,
-            'encryption_method' => 0,
         ];
+
+        if (\version_compare(\phpversion('zip'), '1.14.0', '>=')) {
+            $stat['encryption_method'] = 0;
+        }
+
+        return $stat;
     }
 
 
