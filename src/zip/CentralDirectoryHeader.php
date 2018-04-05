@@ -246,8 +246,7 @@ class CentralDirectoryHeader
             . '/vinternalFileAttributes'
             . '/VexternalFileAttributes'
             . '/VrelativeOffsetOfLocalHeader',
-            $input,
-            $offset
+            ($offset ? \substr($input, $offset) : $input)
         );
         if ($parsed['signature'] !== self::SIGNATURE) {
             throw new \InvalidArgumentException("Invalid signature for central directory header!");

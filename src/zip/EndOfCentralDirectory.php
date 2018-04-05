@@ -81,8 +81,7 @@ class EndOfCentralDirectory
             . '/VsizeOfTheCentralDirectory'
             . '/VoffsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber'
             . '/vzipFileCommentLength',
-            $input,
-            $offset
+            ($offset ? \substr($input, $offset) : $input)
         );
         if ($parsed['signature'] !== self::SIGNATURE) {
             throw new \InvalidArgumentException("Invalid signature for local file header!");

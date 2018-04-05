@@ -119,8 +119,7 @@ class LocalFileHeader
             . '/VuncompressedSize'
             . '/vfileNameLength'
             . '/vextraFieldLength',
-            $input,
-            $offset
+            ($offset ? \substr($input, $offset) : $input)
         );
         if ($parsed['signature'] !== self::SIGNATURE) {
             throw new \InvalidArgumentException("Invalid signature for local file header!");
