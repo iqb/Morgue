@@ -50,15 +50,13 @@ class ZipArchiveTest extends TestCase
      * @param array $parameterLists List of parameter lists
      * @param bool $useSame Whether to use assertSame or assertEquals to compare results
      */
-    private function compareMethodResults(string $filename, string $testMethod, array $parameterLists, bool $useSame)
+    private function compareMethodResults(string $filename, string $testMethod, array $parameterLists, $assertMethod = 'assertSame')
     {
         $fromExt = new \ZipArchive();
         $fromExt->open($filename);
 
         $fromPkg = new ZipArchive();
         $fromPkg->open($filename);
-
-        $assertMethod = ($useSame ? 'assertSame' : 'assertEquals');
 
         foreach ($parameterLists as $parameterList) {
             $this->{$assertMethod}($fromExt->{$testMethod}(...$parameterList), $fromPkg->{$testMethod}(...$parameterList), new ErrorMessage($testMethod, $parameterList, false));
@@ -169,7 +167,7 @@ class ZipArchiveTest extends TestCase
      */
     public function testGetCommentIndex(string $fileName, int $index, string $name)
     {
-        $this->compareMethodResults($fileName, 'getCommentIndex', [[$index]], true);
+        $this->compareMethodResults($fileName, 'getCommentIndex', [[$index]], 'assertSame');
     }
 
 
@@ -179,7 +177,7 @@ class ZipArchiveTest extends TestCase
      */
     public function testGetCommentName(string $fileName, int $index, string $name)
     {
-        $this->compareMethodResults($fileName, 'getCommentName', $this->createNameAndFlagsParameterLists($name), true);
+        $this->compareMethodResults($fileName, 'getCommentName', $this->createNameAndFlagsParameterLists($name), 'assertSame');
     }
 
 
@@ -199,7 +197,7 @@ class ZipArchiveTest extends TestCase
             [$index, 600, \ZipArchive::FL_COMPRESSED],
             [$index, 100000],
             [$index, 100000, \ZipArchive::FL_COMPRESSED],
-        ], false);
+        ], 'assertEquals');
     }
 
 
@@ -219,7 +217,7 @@ class ZipArchiveTest extends TestCase
             [$name, 600, \ZipArchive::FL_COMPRESSED],
             [$name, 100000],
             [$name, 100000, \ZipArchive::FL_COMPRESSED],
-        ], false);
+        ], 'assertEquals');
     }
 
 
@@ -229,7 +227,7 @@ class ZipArchiveTest extends TestCase
      */
     public function testLocateNameUnmodified(string $fileName, int $index, string $name)
     {
-        $this->compareMethodResults($fileName, 'locateName', $this->createNameAndFlagsParameterLists($name), true);
+        $this->compareMethodResults($fileName, 'locateName', $this->createNameAndFlagsParameterLists($name), 'assertSame');
     }
 
 
@@ -248,12 +246,7 @@ class ZipArchiveTest extends TestCase
         $refStat = $fromExt->statIndex($index);
         $pkgStat = $fromPkg->statIndex($index);
 
-        // field depends on ext-zip version (>= 1.14.0) and version of libzip (>= 1.2.0)
-        if (!isset($refStat['encryption_method'])) {
-            unset($pkgStat['encryption_method']);
-        }
-
-        $this->assertEquals($refStat, $pkgStat, "Testing: $name");
+        $this->assertStat($refStat, $pkgStat, "Testing: $name");
     }
 
 
@@ -263,6 +256,18 @@ class ZipArchiveTest extends TestCase
      */
     public function testStatNameUnmodified(string $fileName, int $index, string $name)
     {
-        $this->compareMethodResults($fileName, 'statName', $this->createNameAndFlagsParameterLists($name), true);
+        $this->compareMethodResults($fileName, 'statName', $this->createNameAndFlagsParameterLists($name), 'assertStat');
+    }
+
+    /**
+     * encryption_method field depends on ext-zip version (>= 1.14.0) and version of libzip (>= 1.2.0)
+     */
+    private function assertStat($expected, $actual, $message)
+    {
+        if (is_array($expected) && is_Array($actual) && !isset($expected['encryption_method'])) {
+            unset($actual['encryption_method']);
+        }
+
+        $this->assertEquals($expected, $actual, $message);
     }
 }
