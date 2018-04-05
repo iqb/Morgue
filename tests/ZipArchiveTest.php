@@ -162,6 +162,9 @@ class ZipArchiveTest extends TestCase
     {
         $this->compareMethodResults($fileName, 'getFromIndex', [
             [$index],
+            [$index, null, \ZipArchive::FL_COMPRESSED],
+            [$index, 0],
+            [$index, 0, \ZipArchive::FL_COMPRESSED],
             [$index, 64],
             [$index, 64, \ZipArchive::FL_COMPRESSED],
             [$index, 600],
@@ -179,6 +182,9 @@ class ZipArchiveTest extends TestCase
     {
         $this->compareMethodResults($fileName, 'getFromName', [
             [$name],
+            [$name, null, \ZipArchive::FL_COMPRESSED],
+            [$name, 0],
+            [$name, 0, \ZipArchive::FL_COMPRESSED],
             [$name, 64],
             [$name, 64, \ZipArchive::FL_COMPRESSED],
             [$name, 600],

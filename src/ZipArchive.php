@@ -213,12 +213,13 @@ class ZipArchive
      *
      * @link http://php.net/manual/en/ziparchive.getfromindex.php
      */
-    final public function getFromIndex(int $index, int $length = 0, int $flags = 0)
+    final public function getFromIndex(int $index, int $length = null, int $flags = null)
     {
         if (($stream = $this->getStreamIndex($index, $flags)) === false) {
             return false;
         }
 
+        $length = (is_null($length) ? 0 : $length);
         $string = '';
         do {
             $chunkSize = ($length ? $length - \strlen($string) : 8192);
@@ -243,7 +244,7 @@ class ZipArchive
      *
      * @link http://php.net/manual/en/ziparchive.getfromname.php
      */
-    final public function getFromName(string $name, int $length = 0, int $flags = 0)
+    final public function getFromName(string $name, int $length = null, int $flags = null)
     {
         if (($index = $this->locateName($name, $flags & (self::FL_UNCHANGED|self::FL_NOCASE))) === false) {
             return false;
@@ -260,7 +261,7 @@ class ZipArchive
      * @param int $flags
      * @return resource|false
      */
-    final public function getStreamIndex(int $index, int $flags = 0)
+    final public function getStreamIndex(int $index, int $flags = null)
     {
         if (!isset($this->originalCentralDirectory[$index])) {
             return false;
