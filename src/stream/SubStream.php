@@ -47,8 +47,6 @@ final class SubStream
 
     public function stream_eof()
     {
-        echo "feof {$this->offset} : {$this->enforceOffsetMax}\n";
-
         return ($this->offset >= $this->enforceOffsetMax);
     }
 
@@ -80,6 +78,7 @@ final class SubStream
 
         $this->enforceOffsetMin = \intval($parts['host']);
         $this->enforceOffsetMax = $this->enforceOffsetMin + \intval($parts['port']);
+        $this->offset = $this->enforceOffsetMin;
         $resource = \intval(\substr($parts['path'], 1));
         $resources = \get_resources();
 

@@ -73,4 +73,20 @@ class SubStreamTest extends TestCase
             $this->assertSame(\ftell($referenceStream), \ftell($subStream), new ErrorMessage('ftell after reading', $debugArgs));
         }
     }
+
+
+    public function testReadWithoutSeek()
+    {
+        $offset = 500;
+        $length = 1000;
+
+        $subStream = \fopen(SubStream::SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->memoryStream, 'r');
+        $this->assertTrue(\is_resource($subStream));
+
+        $referenceStream = \fopen('php://memory', 'r+');
+        $this->assertSame($length, \fwrite($referenceStream, \substr($this->string, $offset, $length)));
+        \fseek($referenceStream, 0);
+
+        $this->assertEquals(\fread($subStream, 2*$length), \fread($referenceStream, 2*$length));
+    }
 }
