@@ -424,11 +424,31 @@ class ZipArchive
 
 
     /**
+     * Number of files in archive
      * @var int
      */
     public $numFiles;
 
     /**
+     * Status of the Zip Archive
+     * @var int
+     */
+    public $status = 0;
+
+    /**
+     * System status of the Zip Archive
+     * @var int
+     */
+    public $statusSys = 0;
+
+    /**
+     * File name in the file system
+     * @var string
+     */
+    public $filename;
+
+    /**
+     * Comment for the archive
      * @var string
      */
     public $comment;
@@ -464,7 +484,8 @@ class ZipArchive
 
     public function open(string $filename)
     {
-        $this->handle = \fopen($filename, 'r+');
+        $this->filename = \realpath($filename);
+        $this->handle = \fopen($this->filename, 'r+');
 
         // Find end of central directory
         $this->originalEndOfCentralDirectory = $this->findEndOfCentralDirectory();
@@ -519,6 +540,8 @@ class ZipArchive
 
             return $endOfCentralDirectory;
         }
+
+        return null;
     }
 
 
@@ -530,8 +553,10 @@ class ZipArchive
      *
      * @link http://php.net/manual/en/ziparchive.getarchivecomment.php
      */
-    final public function getArchiveComment(int $flags = 0)
+    final public function getArchiveComment(int $flags = null)
     {
+        $validFlags = (is_null($flags) ? 0 : $flags & self::FL_UNCHANGED);
+
         if ($this->originalEndOfCentralDirectory->zipFileCommentLength > 0) {
             return $this->originalEndOfCentralDirectory->zipFileComment;
         } else {
@@ -549,8 +574,10 @@ class ZipArchive
      *
      * @link http://php.net/manual/en/ziparchive.getcommentindex.php
      */
-    final public function getCommentIndex(int $index, int $flags = 0)
+    final public function getCommentIndex(int $index, int $flags = null)
     {
+        $validFlags = (is_null($flags) ? 0 : $flags & self::FL_UNCHANGED);
+
         if (isset($this->originalCentralDirectory[$index])) {
             return $this->originalCentralDirectory[$index]->fileComment;
         } else {
@@ -563,15 +590,21 @@ class ZipArchive
      * Returns the comment of an entry using the entry name
      *
      * @param string $name Name of the entry
-     * @param int $flags ZipArchive::FL_UNCHANGED or 0
+     * @param int $flags Any combination of ZipArchive::FL_UNCHANGED
      * @return string|false
      *
      * @link http://php.net/manual/en/ziparchive.getcommentname.php
      */
-    final public function getCommentName(string $name, int $flags = 0)
+    final public function getCommentName(string $name, int $flags = null)
     {
-        if (($index = $this->locateName($name, $flags & ZipArchive::FL_UNCHANGED)) !== false) {
-            return $this->getCommentIndex($index, $flags);
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_UNCHANGED));
+
+        if (($index = $this->locateName($name, $validFlags)) !== false) {
+            // Hack to align behaviour with \ZipArchive
+            if ($flags & self::FL_NODIR) {
+                $this->status = self::ER_NOENT;
+            }
+            return $this->getCommentIndex($index, $validFlags);
         } else {
             return false;
         }
@@ -583,14 +616,16 @@ class ZipArchive
      *
      * @param int $index Index of the entry
      * @param int $length The length to be read from the entry. If 0, then the entire entry is read.
-     * @param int $flags Any combination of ZipArchive::FL_UNCHANGED|ZipArchive::FL_COMPRESSED
+     * @param int $flags Any combination of ZipArchive::FL_COMPRESSED|ZipArchive::FL_UNCHANGED
      * @return string|false
      *
      * @link http://php.net/manual/en/ziparchive.getfromindex.php
      */
     final public function getFromIndex(int $index, int $length = null, int $flags = null)
     {
-        if (($stream = $this->getStreamIndex($index, $flags)) === false) {
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_COMPRESSED|self::FL_UNCHANGED));
+
+        if (($stream = $this->getStreamIndex($index, $validFlags)) === false) {
             return false;
         }
 
@@ -614,30 +649,34 @@ class ZipArchive
      *
      * @param string $name Name of the entry
      * @param int $length The length to be read from the entry. If 0, then the entire entry is read.
-     * @param int $flags Any combination of ZipArchive::FL_UNCHANGED|ZipArchive::FL_COMPRESSED|ZipArchive::FL_NOCASE
+     * @param int $flags Any combination of ZipArchive::FL_COMPRESSED|ZipArchive::FL_NOCASE|ZipArchive::FL_UNCHANGED
      * @return bool
      *
      * @link http://php.net/manual/en/ziparchive.getfromname.php
      */
     final public function getFromName(string $name, int $length = null, int $flags = null)
     {
-        if (($index = $this->locateName($name, $flags & (self::FL_UNCHANGED|self::FL_NOCASE))) === false) {
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_COMPRESSED|self::FL_UNCHANGED));
+
+        if (($index = $this->locateName($name, $validFlags)) === false) {
             return false;
         }
 
-        return $this->getFromIndex($index, $length, $flags & (self::FL_UNCHANGED|self::FL_COMPRESSED));
+        return $this->getFromIndex($index, $length, $validFlags);
     }
 
 
     /**
      * Get a file handle to the entry defined by its index (read only)
      *
-     * @param int $index
-     * @param int $flags
+     * @param int $index Index of the entry
+     * @param int $flags Any combination of ZipArchive::FL_COMPRESSED|ZipArchive::FL_UNCHANGED
      * @return resource|false
      */
     final public function getStreamIndex(int $index, int $flags = null)
     {
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_COMPRESSED|self::FL_UNCHANGED));
+
         if (!isset($this->originalCentralDirectory[$index])) {
             return false;
         } else {
@@ -661,7 +700,7 @@ class ZipArchive
             return false;
         }
 
-        if (($entry->compressionMethod === self::CM_STORE) || ($flags & self::FL_COMPRESSED)) {
+        if (($entry->compressionMethod === self::CM_STORE) || ($validFlags & self::FL_COMPRESSED)) {
             return $handle;
         }
 
@@ -692,8 +731,11 @@ class ZipArchive
      */
     final public function locateName(string $name, int $flags = 0)
     {
-        $ignoreCase = (($flags & self::FL_NOCASE) !== 0);
-        $ignoreDir = (($flags & self::FL_NODIR) !== 0);
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_NOCASE|self::FL_NODIR));
+        $this->status = 0;
+
+        $ignoreCase = (($validFlags & self::FL_NOCASE) !== 0);
+        $ignoreDir = (($validFlags & self::FL_NODIR) !== 0);
 
         if (!$ignoreCase && !$ignoreDir && isset($this->originalCentralDirectoryNameToIndexMapping[$name])) {
             return $this->originalCentralDirectoryNameToIndexMapping[$name];
@@ -715,6 +757,7 @@ class ZipArchive
             }
         }
 
+        $this->status = self::ER_NOENT;
         return false;
     }
 
@@ -728,8 +771,10 @@ class ZipArchive
      *
      * @link http://php.net/manual/en/ziparchive.statindex.php
      */
-    final public function statIndex(int $index, int $flags = 0)
+    final public function statIndex(int $index, int $flags = null)
     {
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_UNCHANGED));
+
         if (!isset($this->originalCentralDirectory[$index])) {
             return false;
         }
@@ -761,8 +806,10 @@ class ZipArchive
      */
     final public function statName(string $name, int $flags = 0)
     {
-        if (($index = $this->locateName($name, $flags)) !== false) {
-            return $this->statIndex($index, $flags);
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_NOCASE|self::FL_NODIR|self::FL_UNCHANGED));
+
+        if (($index = $this->locateName($name, $validFlags)) !== false) {
+            return $this->statIndex($index, $validFlags);
         }
 
         return false;

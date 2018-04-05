@@ -62,6 +62,12 @@ class ZipArchiveTest extends TestCase
 
         foreach ($parameterLists as $parameterList) {
             $this->{$assertMethod}($fromExt->{$testMethod}(...$parameterList), $fromPkg->{$testMethod}(...$parameterList), new ErrorMessage($testMethod, $parameterList, false));
+
+            $this->assertSame($fromExt->numFiles, $fromPkg->numFiles, new ErrorMessage('ZipArchive::$numFiles after '.$testMethod, $parameterList, false));
+            $this->assertSame($fromExt->status, $fromPkg->status, new ErrorMessage('ZipArchive::$status after '.$testMethod, $parameterList, false));
+            $this->assertSame($fromExt->statusSys, $fromPkg->statusSys, new ErrorMessage('ZipArchive::$statusSys after '.$testMethod, $parameterList, false));
+            $this->assertSame($fromExt->filename, $fromPkg->filename, new ErrorMessage('ZipArchive::$filename after '.$testMethod, $parameterList, false));
+            $this->assertSame($fromExt->comment, $fromPkg->comment, new ErrorMessage('ZipArchive::$comment after '.$testMethod, $parameterList, false));
         }
     }
 
@@ -109,6 +115,9 @@ class ZipArchiveTest extends TestCase
         return $this->fileEntryLister($this->zipFileNoExtras);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function constantsProvider()
     {
         $reflectionClass = new \ReflectionClass(\ZipArchive::class);
@@ -122,7 +131,7 @@ class ZipArchiveTest extends TestCase
     /**
      * @dataProvider constantsProvider
      */
-    public function testConstants(string $name, $value)
+    public function testConstants(string $name)
     {
         $this->assertTrue(\defined(ZipArchive::class . '::' . $name), 'Missing constant ZipArchive::' . $name);
         $this->assertSame(\constant(\ZipArchive::class . '::' . $name), \constant(ZipArchive::class . '::' . $name), 'Checking constant ZipArchive::' . $name);
