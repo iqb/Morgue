@@ -59,17 +59,9 @@ class SubStreamTest extends TestCase
         for ($i=$iterationStart; $i<$iterationLimit; $i+=$iterationStep) {
             $debugArgs = ['i' => $i];
 
-            $this->assertSame(\fseek($referenceStream, $i, $seekMode), \fseek($subStream, $i, $seekMode), new ErrorMessage('fseek', $debugArgs));
-            $this->assertSame(\feof($referenceStream), \feof($subStream), new ErrorMessage('feof', $debugArgs));
-
-            // No further tests here as StreamWrapper streams can not trick \ftell() into returning false :-(
-            // The stream position is cached by the streams API so reading the last byte will advance the internal position
-            // to the first byte after the end. Even though \feof() returns true, the unreachable position is returned, not false
-            if (\feof($subStream)) { break; }
-
-            $this->assertSame(\ftell($referenceStream), \ftell($subStream), new ErrorMessage('ftell', $debugArgs));
+            \fseek($referenceStream, $i, $seekMode);
+            \fseek($subStream, $i, $seekMode);
             $this->assertEquals($string = \fread($referenceStream, $probeLength), \fread($subStream, $probeLength), new ErrorMessage('fread', $debugArgs));
-            $this->assertSame(\ftell($referenceStream), \ftell($subStream), new ErrorMessage('ftell after reading', $debugArgs));
         }
     }
 
