@@ -123,8 +123,8 @@ class ZipArchiveTest extends TestCase
         $reflectionClass = new \ReflectionClass(\ZipArchive::class);
 
         /* @var $constant \ReflectionClassConstant */
-        foreach ($reflectionClass->getReflectionConstants() as $constant) {
-            yield $constant->getName() => [$constant->getName(), $constant->getValue()];
+        foreach ($reflectionClass->getConstants() as $constantName => $constantValue) {
+            yield "$constantName ($constantValue)" => [$constantName, $constantValue];
         }
     }
 
