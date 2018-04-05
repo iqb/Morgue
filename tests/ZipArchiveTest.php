@@ -245,7 +245,15 @@ class ZipArchiveTest extends TestCase
         $fromPkg = new ZipArchive();
         $fromPkg->open($fileName);
 
-        $this->assertEquals($fromExt->statIndex($index), $fromPkg->statIndex($index), "Testing: $name");
+        $refStat = $fromExt->statIndex($index);
+        $pkgStat = $fromPkg->statIndex($index);
+
+        // field depends on ext-zip version (>= 1.14.0) and version of libzip (>= 1.2.0)
+        if (!isset($refStat['encryption_method'])) {
+            unset($pkgStat['encryption_method']);
+        }
+
+        $this->assertEquals($refStat, $pkgStat, "Testing: $name");
     }
 
 
