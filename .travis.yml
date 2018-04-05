@@ -56,11 +56,11 @@ php:
   - nightly
 
 install:
-  - composer install
+  - composer install --no-dev
   - wget -O phpunit https://phar.phpunit.de/phpunit-6.phar
 
 script:
-  - php phpunit-6.phar --coverage-clover=coverage.clover
+  - php phpunit --coverage-clover=coverage.clover
 
 after_script:
   - wget https://scrutinizer-ci.com/ocular.phar
