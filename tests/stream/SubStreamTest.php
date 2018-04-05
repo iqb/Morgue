@@ -50,9 +50,11 @@ class SubStreamTest extends TestCase
         $subStream = \fopen(SubStream::SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->memoryStream, 'r');
         $this->assertTrue(\is_resource($subStream));
 
-        $referenceStream = \fopen('php://memory', 'r+');
+        $referenceName = \tempnam(\sys_get_temp_dir(), 'phpunit_substream_ref');
+        $referenceStream = \fopen($referenceName, 'r+');
         $this->assertSame($length, \fwrite($referenceStream, \substr($this->string, $offset, $length)));
-        \fseek($referenceStream, 0);
+        \fclose($referenceStream);
+        $referenceStream = \fopen($referenceName, 'r');
 
         for ($i=$iterationStart; $i<$iterationLimit; $i+=$iterationStep) {
             $debugArgs = ['i' => $i];
