@@ -109,6 +109,25 @@ class ZipArchiveTest extends TestCase
         return $this->fileEntryLister($this->zipFileNoExtras);
     }
 
+    public function constantsProvider()
+    {
+        $reflectionClass = new \ReflectionClass(\ZipArchive::class);
+
+        /* @var $constant \ReflectionClassConstant */
+        foreach ($reflectionClass->getReflectionConstants() as $constant) {
+            yield $constant->getName() => [$constant->getName(), $constant->getValue()];
+        }
+    }
+
+    /**
+     * @dataProvider constantsProvider
+     */
+    public function testConstants(string $name, $value)
+    {
+        $this->assertTrue(\defined(ZipArchive::class . '::' . $name), 'Missing constant ZipArchive::' . $name);
+        $this->assertSame(\constant(\ZipArchive::class . '::' . $name), \constant(ZipArchive::class . '::' . $name), 'Checking constant ZipArchive::' . $name);
+    }
+
 
     public function testZipArchive()
     {

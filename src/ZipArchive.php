@@ -7,31 +7,89 @@ use iqb\zip\CentralDirectoryHeader;
 use iqb\zip\EndOfCentralDirectory;
 use iqb\zip\LocalFileHeader;
 
+/**
+ * @link http://php.net/manual/en/class.ziparchive.php
+ * @link http://php.net/manual/en/zip.constants.php
+ */
 class ZipArchive
 {
+    // Flags for open
+
+    /**
+     * Create the archive if it does not exist
+     */
+    const CREATE = 1;
+
+    /**
+     * Error if archive already exists
+     */
+    const EXCL = 2;
+
+    /**
+     * Perform additional consistency checks on the archive, and error if they fail
+     */
+    const CHECKCONS = 4;
+
+    /**
+     * Always start a new archive, this mode will overwrite the file if it already exists
+     */
+    const OVERWRITE = 8;
+
+    // Generic flags
+
     /**
      * Ignore case on name lookup
-     * @link http://php.net/manual/en/zip.constants.php
      */
     const FL_NOCASE = 1;
 
     /**
      * Ignore directory component
-     * @link http://php.net/manual/en/zip.constants.php
      */
     const FL_NODIR = 2;
 
     /**
      * Read compressed data
-     * @link http://php.net/manual/en/zip.constants.php
      */
     const FL_COMPRESSED = 4;
 
     /**
      * Use original data, ignoring changes.
-     * @link http://php.net/manual/en/zip.constants.php
      */
     const FL_UNCHANGED = 8;
+
+    // Encoding flags
+
+    /**
+     * Guess string encoding (is default)
+     */
+    const FL_ENC_GUESS = 0;
+
+    /**
+     * Get unmodified string
+     */
+    const FL_ENC_RAW = 64;
+
+    /**
+     * Follow specification strictly
+     */
+    const FL_ENC_STRICT = 128;
+
+    /**
+     * String is UTF-8 encoded
+     */
+    const FL_ENC_UTF_8 = 2048;
+
+    /**
+     * String is CP437 encoded
+     */
+    const FL_ENC_CP437 = 4096;
+
+    // Compression methods
+
+    /**
+     * Better of store or deflate
+     */
+    const CM_DEFAULT = -1;
 
     /**
      * stored (uncompressed)
@@ -39,14 +97,331 @@ class ZipArchive
     const CM_STORE = 0;
 
     /**
-     * deflate compressed
+     * shrunk
+     */
+    const CM_SHRINK = 1;
+
+    /**
+     * reduced with factor 1
+     */
+    const CM_REDUCE_1 = 2;
+
+    /**
+     * reduced with factor 2
+     */
+    const CM_REDUCE_2 = 3;
+
+    /**
+     * reduced with factor 3
+     */
+    const CM_REDUCE_3 = 4;
+
+    /**
+     * reduced with factor 4
+     */
+    const CM_REDUCE_4 = 5;
+
+    /**
+     * imploded
+     */
+    const CM_IMPLODE = 6;
+
+    /**
+     * deflated
      */
     const CM_DEFLATE = 8;
 
     /**
-     * BZip2 compressed
+     * deflate64
+     */
+    const CM_DEFLATE64 = 9;
+
+    /**
+     * PKWARE Data Compression Library Imploding (old IBM TERSE)
+     */
+    const CM_PKWARE_IMPLODE = 10;
+
+    /**
+     * BZip2 algorithm
      */
     const CM_BZIP2 = 12;
+
+    /**
+     * LZMA (EFS)
+     */
+    const CM_LZMA = 14;
+
+    /**
+     * File is compressed using IBM TERSE
+     */
+    const CM_TERSE = 18;
+
+    /**
+     * IBM LZ77 z Architecture (PFS)
+     */
+    const CM_LZ77 = 19;
+
+    /**
+     * WavPack compressed data
+     * @link http://www.wavpack.com
+     */
+    const CM_WAVPACK = 97;
+
+    /**
+     * PPMd version I, Rev 1
+     * @link http://www.compression.ru/ds/
+     */
+    const CM_PPMD = 98;
+
+    // Error constants
+
+    /**
+     * No error
+     */
+    const ER_OK = 0;
+
+    /**
+     * Multi-disk zip archives not supported
+     */
+    const ER_MULTIDISK = 1;
+
+    /**
+     * Renaming temporary file failed
+     */
+    const ER_RENAME = 2;
+
+    /**
+     * Closing zip archive failed
+     */
+    const ER_CLOSE = 3;
+
+    /**
+     * Seek error
+     */
+    const ER_SEEK = 4;
+
+    /**
+     * Read error
+     */
+    const ER_READ = 5;
+
+    /**
+     * Write error
+     */
+    const ER_WRITE = 6;
+
+    /**
+     * CRC error
+     */
+    const ER_CRC = 7;
+
+    /**
+     * Containing zip archive was closed
+     */
+    const ER_ZIPCLOSED = 8;
+
+    /**
+     * No such file
+     */
+    const ER_NOENT = 9;
+
+    /**
+     * File already exists
+     */
+    const ER_EXISTS = 10;
+
+    /**
+     * Can't open file
+     */
+    const ER_OPEN = 11;
+
+    /**
+     * Failure to create temporary file
+     */
+    const ER_TMPOPEN = 12;
+
+    /**
+     * Zlib error
+     */
+    const ER_ZLIB = 13;
+
+    /**
+     * Memory allocation failure
+     */
+    const ER_MEMORY = 14;
+
+    /**
+     * Entry has been changed
+     */
+    const ER_CHANGED = 15;
+
+    /**
+     * Compression method not supported
+     */
+    const ER_COMPNOTSUPP = 16;
+
+    /**
+     * Premature EOF
+     */
+    const ER_EOF = 17;
+
+    /**
+     * Invalid argument
+     */
+    const ER_INVAL = 18;
+
+    /**
+     * Not a zip archive
+     */
+    const ER_NOZIP = 19;
+
+    /**
+     * Internal error
+     */
+    const ER_INTERNAL = 20;
+
+    /**
+     * Zip archive inconsistent
+     */
+    const ER_INCONS = 21;
+
+    /**
+     * Can't remove file
+     */
+    const ER_REMOVE = 22;
+
+    /**
+     * Entry has been deleted
+     */
+    const ER_DELETED = 23;
+
+    // Encryption
+
+    /**
+     * No encryption
+     */
+    const EM_NONE = 0;
+
+    /**
+     * AES 128 encryption
+     */
+    const EM_AES_128 = 257;
+
+    /**
+     * AES 192 encryption
+     */
+    const EM_AES_192 = 258;
+
+    /**
+     * AES 256 encryption
+     */
+    const EM_AES_256 = 259;
+
+    // Operating system constants for external attributes
+
+    /**
+     * MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)
+     */
+    const OPSYS_DOS = 0;
+
+    /**
+     * Amiga
+     */
+    const OPSYS_AMIGA = 1;
+
+    /**
+     * OpenVMS
+     */
+    const OPSYS_OPENVMS = 2;
+
+    /**
+     * UNIX
+     */
+    const OPSYS_UNIX = 3;
+
+    /**
+     * VM/CMS
+     */
+    const OPSYS_VM_CMS = 4;
+
+    /**
+     * Atari ST
+     */
+    const OPSYS_ATARI_ST = 5;
+
+    /**
+     * OS/2 H.P.F.S.
+     */
+    const OPSYS_OS_2 = 6;
+
+    /**
+     * Macintosh
+     */
+    const OPSYS_MACINTOSH = 7;
+
+    /**
+     * Z-System
+     */
+    const OPSYS_Z_SYSTEM = 8;
+
+    /**
+     * CP/M
+     */
+    const OPSYS_CPM = 9;
+    const OPSYS_Z_CPM = self::OPSYS_CPM;
+
+    /**
+     * Windows NTFS
+     */
+    const OPSYS_WINDOWS_NTFS = 10;
+
+    /**
+     * MVS (OS/390 - Z/OS)
+     */
+    const OPSYS_MVS = 11;
+
+    /**
+     * VSE
+     */
+    const OPSYS_VSE = 12;
+
+    /**
+     * Acorn Risc
+     */
+    const OPSYS_ACORN_RISC = 13;
+
+    /**
+     * VFAT
+     */
+    const OPSYS_VFAT = 14;
+
+    /**
+     * alternate MVS
+     */
+    const OPSYS_ALTERNATE_MVS = 15;
+
+    /**
+     * BeOS
+     */
+    const OPSYS_BEOS = 16;
+
+    /**
+     * Tandem
+     */
+    const OPSYS_TANDEM = 17;
+
+    /**
+     * OS/400
+     */
+    const OPSYS_OS_400 = 18;
+
+    /**
+     * OS X (Darwin)
+     */
+    const OPSYS_OS_X = 19;
+
+    const OPSYS_DEFAULT = self::OPSYS_UNIX;
+
 
     /**
      * @var int
