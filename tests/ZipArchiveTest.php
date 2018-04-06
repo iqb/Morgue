@@ -49,9 +49,9 @@ class ZipArchiveTest extends TestCase
      * @param string $filename ZIP file to test on
      * @param string $testMethod The method on the ZipArchive to compare results for
      * @param array $parameterLists List of parameter lists
-     * @param bool $useSame Whether to use assertSame or assertEquals to compare results
+     * @param string $assertMethod The method of $this used as the assertion method
      */
-    private function compareMethodResults(string $filename, string $testMethod, array $parameterLists, $assertMethod = 'assertSame')
+    private function compareMethodResults(string $filename, string $testMethod, array $parameterLists, string $assertMethod = 'assertSame')
     {
         $fromExt = new \ZipArchive();
         $fromExt->open($filename);
