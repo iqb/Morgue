@@ -618,8 +618,10 @@ class ZipArchive implements \Countable
         $directory = ($validFlags & self::FL_UNCHANGED ? $this->originalCentralDirectory : $this->modifiedCentralDirectory);
 
         if (isset($directory[$index])) {
+            $this->status = self::ER_OK;
             return $directory[$index]->getFileComment();
         } else {
+            $this->status = self::ER_INVAL;
             return false;
         }
     }
@@ -767,6 +769,9 @@ class ZipArchive implements \Countable
             case self::ER_NOENT:
                 return "No such file";
 
+            case self::ER_INVAL:
+                return "Invalid argument";
+
             default:
                 return "";
         }
@@ -872,7 +877,7 @@ class ZipArchive implements \Countable
     final public function locateName(string $name, int $flags = 0)
     {
         $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_NOCASE|self::FL_NODIR));
-        $this->status = 0;
+        $this->status = self::ER_OK;
 
         $ignoreCase = (($validFlags & self::FL_NOCASE) !== 0);
         $ignoreDir = (($validFlags & self::FL_NODIR) !== 0);

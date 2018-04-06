@@ -179,26 +179,6 @@ class ZipArchiveTest extends TestCase
 
 
     /**
-     * Tests getCommentIndex() on unmodified zip file.
-     * @dataProvider commentsZipFileProvider
-     */
-    public function testGetCommentIndex(string $fileName, int $index, string $name)
-    {
-        $this->compareMethodResults($fileName, 'getCommentIndex', [[$index]], 'assertSame');
-    }
-
-
-    /**
-     * Tests getCommentName() on unmodified zip file.
-     * @dataProvider commentsZipFileProvider
-     */
-    public function testGetCommentName(string $fileName, int $index, string $name)
-    {
-        $this->compareMethodResults($fileName, 'getCommentName', $this->createNameAndFlagsParameterLists($name), 'assertSame');
-    }
-
-
-    /**
      * @dataProvider noExtrasZipFileProvider
      */
     public function testGetStream(string $fileName, int $index, string $name)
