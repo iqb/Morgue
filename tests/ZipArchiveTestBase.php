@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 abstract class ZipArchiveTestBase extends TestCase
 {
     const ZIP_NO_EXTRAS = __DIR__ . '/test-no-extras.zip';
+    const ZIP_COMMENTS = __DIR__ . '/comments.zip';
 
     /**
      * Get all file names with their index from an archive
@@ -59,6 +60,17 @@ abstract class ZipArchiveTestBase extends TestCase
             }
         }
         return $flags;
+    }
+
+    final protected function runMethodTest(string $methodName, string $fileName, ...$parameters)
+    {
+        $zipExt = new \ZipArchive();
+        $zipExt->open($fileName);
+        $zipPkg = new ZipArchive();
+        $zipPkg->open($fileName);
+
+        $this->assertSame($zipExt->$methodName(...$parameters), $zipPkg->$methodName(...$parameters), "method call");
+        $this->assertZipArchiveStatus($zipExt, $zipPkg);
     }
 
     final protected function assertZipArchiveStatus(\ZipArchive $zipExt, ZipArchive $zipPkg)

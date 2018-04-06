@@ -46,12 +46,6 @@ class ZipArchiveGetFromTest extends ZipArchiveTestBase
      */
     public function testGetFrom(string $methodName, string $fileName, $qualifier, $offset, int $flags)
     {
-        $zipExt = new \ZipArchive();
-        $zipExt->open($fileName);
-        $zipPkg = new ZipArchive();
-        $zipPkg->open($fileName);
-
-        $this->assertSame($zipExt->$methodName($qualifier, $offset, $flags), $zipPkg->$methodName($qualifier, $offset, $flags), "method call");
-        $this->assertZipArchiveStatus($zipExt, $zipPkg);
+        $this->runMethodTest($methodName, $fileName, $qualifier, $offset, $flags);
     }
 }
