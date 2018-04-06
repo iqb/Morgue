@@ -246,8 +246,8 @@ final class CentralDirectoryHeader
         }
 
         $parsed = \unpack(
-            'Nsignature/'
-            . 'vversionMadeBy'
+            'Nsignature'
+            . '/vversionMadeBy'
             . '/vversionNeededToExtract'
             . '/vgeneralPurposeBitFlags'
             . '/vcompressionMethod'
