@@ -456,17 +456,22 @@ class ZipArchive implements \Countable
     /**
      * @var CentralDirectoryHeader[]
      */
-    public $originalCentralDirectory = [];
-
-    /**
-     * @var array(string => int)
-     */
-    public $originalCentralDirectoryNameToIndexMapping = [];
+    private $originalCentralDirectory = [];
 
     /**
      * @var EndOfCentralDirectory
      */
-    public $originalEndOfCentralDirectory;
+    private $originalEndOfCentralDirectory;
+
+    /**
+     * @var CentralDirectoryHeader[]
+     */
+    private $modifiedCentralDirectory = [];
+
+    /**
+     * @var EndOfCentralDirectory
+     */
+    private $modifiedEndOfCentralDirectory;
 
 
     public function __construct()
@@ -520,31 +525,28 @@ class ZipArchive implements \Countable
         $this->handle = \fopen($this->filename, 'r+');
 
         // Find end of central directory
-        $this->originalEndOfCentralDirectory = $this->findEndOfCentralDirectory();
-        $this->modifiedEndOfCentralDirectory = clone $this->originalEndOfCentralDirectory;
-        $this->comment = $this->originalEndOfCentralDirectory->zipFileComment;
+        $this->originalEndOfCentralDirectory = $this->modifiedEndOfCentralDirectory = $this->findEndOfCentralDirectory();
 
         // Read central directory
-        if (\fseek($this->handle, $this->originalEndOfCentralDirectory->offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber) === -1) {
+        if (\fseek($this->handle, $this->originalEndOfCentralDirectory->getOffsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber()) === -1) {
             throw new \RuntimeException("Unable to read Central Directory");
         }
 
-        $centralDirectoryData = \fread($this->handle, $this->originalEndOfCentralDirectory->sizeOfTheCentralDirectory);
+        $centralDirectoryData = \fread($this->handle, $this->originalEndOfCentralDirectory->getSizeOfTheCentralDirectory());
         $offset = 0;
 
-        for ($i=0; $i<$this->originalEndOfCentralDirectory->totalNumberOfEntriesInTheCentralDirectory; $i++) {
+        for ($i=0; $i<$this->originalEndOfCentralDirectory->getTotalNumberOfEntriesInTheCentralDirectory(); $i++) {
             $centralDirectoryEntry = CentralDirectoryHeader::parse($centralDirectoryData, $offset);
             $offset += CentralDirectoryHeader::MIN_LENGTH;
 
-            if ($centralDirectoryEntry->requireAdditionalData) {
+            if ($centralDirectoryEntry->getVariableLength() > 0) {
                 $offset += $centralDirectoryEntry->parseAdditionalData($centralDirectoryData, $offset);
             }
 
             $this->originalCentralDirectory[] = $centralDirectoryEntry;
-            $this->modifiedCentralDirectory[] = clone $centralDirectoryEntry;
-            $this->modifiedIndices[] = false;
         }
 
+        $this->modifiedCentralDirectory = $this->originalCentralDirectory;
         $this->numFiles = \count($this->originalCentralDirectory);
     }
 
@@ -567,8 +569,8 @@ class ZipArchive implements \Countable
             }
 
             $endOfCentralDirectory = EndOfCentralDirectory::parse($chunk);
-            if ($endOfCentralDirectory->requireAdditionalData) {
-                $additionalData = \fread($this->handle, $endOfCentralDirectory->requireAdditionalData);
+            if ($endOfCentralDirectory->getVariableLength() > 0) {
+                $additionalData = \fread($this->handle, $endOfCentralDirectory->getVariableLength());
                 $endOfCentralDirectory->parseAdditionalData($additionalData);
             }
 
@@ -592,11 +594,11 @@ class ZipArchive implements \Countable
         $validFlags = (is_null($flags) ? 0 : $flags & self::FL_UNCHANGED);
 
         if ($validFlags & self::FL_UNCHANGED) {
-            return $this->originalEndOfCentralDirectory->zipFileComment;
+            return $this->originalEndOfCentralDirectory->getZipFileComment();
         }
 
         else {
-            return $this->modifiedEndOfCentralDirectory->zipFileComment;
+            return $this->modifiedEndOfCentralDirectory->getZipFileComment();
         }
     }
 
@@ -616,7 +618,7 @@ class ZipArchive implements \Countable
         $directory = ($validFlags & self::FL_UNCHANGED ? $this->originalCentralDirectory : $this->modifiedCentralDirectory);
 
         if (isset($directory[$index])) {
-            return $directory[$index]->fileComment;
+            return $directory[$index]->getFileComment();
         } else {
             return false;
         }
@@ -720,33 +722,33 @@ class ZipArchive implements \Countable
             $entry = $this->originalCentralDirectory[$index];
         }
 
-        if ($entry->compressedSize === 0) {
+        if ($entry->getCompressedSize() === 0) {
             return false;
         }
 
-        \fseek($this->handle, $entry->relativeOffsetOfLocalHeader);
+        \fseek($this->handle, $entry->getRelativeOffsetOfLocalHeader());
         $localHeader = LocalFileHeader::parse(\fread($this->handle, LocalFileHeader::MIN_LENGTH));
-        if ($localHeader->requireAdditionalData) {
-            $localHeader->parseAdditionalData(\fread($this->handle, $localHeader->requireAdditionalData));
+        if ($localHeader->getVariableLength() > 0) {
+            $localHeader->parseAdditionalData(\fread($this->handle, $localHeader->getVariableLength()));
         }
 
         $offset = \ftell($this->handle);
-        $length = $entry->compressedSize;
+        $length = $entry->getCompressedSize();
 
         if (($handle = \fopen(SubStream::SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->handle, 'r')) === false) {
             return false;
         }
 
-        if (($entry->compressionMethod === self::CM_STORE) || ($validFlags & self::FL_COMPRESSED)) {
+        if (($entry->getCompressionMethod() === self::CM_STORE) || ($validFlags & self::FL_COMPRESSED)) {
             return $handle;
         }
 
-        elseif ($entry->compressionMethod === self::CM_DEFLATE) {
+        elseif ($entry->getCompressionMethod() === self::CM_DEFLATE) {
             \stream_filter_append($handle, 'zlib.inflate', \STREAM_FILTER_READ);
             return $handle;
         }
 
-        elseif ($entry->compressionMethod === self::CM_BZIP2) {
+        elseif ($entry->getCompressionMethod() === self::CM_BZIP2) {
             \stream_filter_append($handle, 'bzip2.decompress', \STREAM_FILTER_READ);
             return $handle;
         }
@@ -781,7 +783,7 @@ class ZipArchive implements \Countable
                 continue;
             }
 
-            $entryName = $possibleEntry->fileName;
+            $entryName = $possibleEntry->getFileName();
             $entryName = ($ignoreCase ? \strtolower($entryName) : $entryName);
             $entryName = ($ignoreDir ? \basename($entryName) : $entryName);
 
@@ -816,13 +818,13 @@ class ZipArchive implements \Countable
         $entry = $this->originalCentralDirectory[$index];
 
         return [
-            'name' => $entry->fileName,
+            'name' => $entry->getFileName(),
             'index' => $index,
-            'crc' => $entry->crc32,
-            'size' => $entry->uncompressedSize,
-            'mtime' => $entry->lastModification->getTimestamp(),
-            'comp_size' => $entry->compressedSize,
-            'comp_method' => $entry->compressionMethod,
+            'crc' => $entry->getCrc32(),
+            'size' => $entry->getUncompressedSize(),
+            'mtime' => $entry->getLastModification()->getTimestamp(),
+            'comp_size' => $entry->getCompressedSize(),
+            'comp_method' => $entry->getCompressionMethod(),
             'encryption_method' => 0,
         ];
     }

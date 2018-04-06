@@ -2,7 +2,7 @@
 
 namespace iqb\zip;
 
-class EndOfCentralDirectory
+final class EndOfCentralDirectory
 {
     const SIGNATURE = 0x504b0506;
 
@@ -15,25 +15,50 @@ class EndOfCentralDirectory
     /// The zip file comment can not be longer than this (the length field has only 2 bytes)
     const ZIP_FILE_COMMENT_MAX_LENGTH = (255 * 255) - 1;
 
-    public $numberOfThisDisk;
+    /**
+     * @var int
+     */
+    private $numberOfThisDisk;
 
-    public $numberOfTheDiskWithTheStartOfTheCentralDirectory;
+    /**
+     * @var int
+     */
+    private $numberOfTheDiskWithTheStartOfTheCentralDirectory;
 
-    public $totalNumberOfEntriesInTheCentralDirectoryOnThisDisk;
+    /**
+     * @var int
+     */
+    private $totalNumberOfEntriesInTheCentralDirectoryOnThisDisk;
 
-    public $totalNumberOfEntriesInTheCentralDirectory;
+    /**
+     * @var int
+     */
+    private $totalNumberOfEntriesInTheCentralDirectory;
 
-    public $sizeOfTheCentralDirectory;
+    /**
+     * @var int
+     */
+    private $sizeOfTheCentralDirectory;
 
-    public $offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber;
+    /**
+     * @var int
+     */
+    private $offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber;
 
-    public $zipFileCommentLength;
+    /**
+     * @var int
+     */
+    private $zipFileCommentLength;
 
-    public $zipFileComment = "";
+    /**
+     * @var string
+     */
+    private $zipFileComment = "";
 
-    /// @var int
-    public $requireAdditionalData;
-
+    /**
+     * @var bool
+     */
+    private $requireAdditionalData = false;
 
     public function __construct(
         int $numberOfThisDisk,
@@ -57,10 +82,9 @@ class EndOfCentralDirectory
         }
     }
 
-
     /**
      * Parse the end of central directory from a binary string.
-     * Check $requireAdditionalData to check if parseAdditionalData() must be called to parse additional fields.
+     * Use getVariableLength() to get the required number of bytes to execute parseAdditionalData().
      *
      * @param string $input
      * @param int $offset Start at this position inside the string
@@ -69,7 +93,7 @@ class EndOfCentralDirectory
     public static function parse(string $input, int $offset = 0)
     {
         if (\strlen($input) < ($offset+self::MIN_LENGTH)) {
-            throw new \InvalidArgumentException("Not enough data to parse local file header!");
+            throw new \InvalidArgumentException("Not enough data to parse end of central directory!");
         }
 
         $parsed = \unpack(
@@ -84,7 +108,7 @@ class EndOfCentralDirectory
             ($offset ? \substr($input, $offset) : $input)
         );
         if ($parsed['signature'] !== self::SIGNATURE) {
-            throw new \InvalidArgumentException("Invalid signature for local file header!");
+            throw new \InvalidArgumentException("Invalid signature for end of central directory!");
         }
 
         $endOfCentralDirectory = new static(
@@ -96,19 +120,18 @@ class EndOfCentralDirectory
             $parsed['offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber']
         );
         $endOfCentralDirectory->zipFileCommentLength = $parsed['zipFileCommentLength'];
-        $endOfCentralDirectory->requireAdditionalData = $endOfCentralDirectory->zipFileCommentLength;
+        $endOfCentralDirectory->requireAdditionalData = ($endOfCentralDirectory->zipFileCommentLength > 0);
 
         return $endOfCentralDirectory;
     }
 
-
     /**
-     * After a new object has been created by parse(), this method must be called to initialize the zip file comment entry which has dynamic field length.
-     * The required number of bytes is written to the $requireAdditionalData attribute by parse().
+     * After a new object has been created by parse(), this method must be called to initialize the zip file comment entry which has variable field length.
+     * The required number of bytes can be obtained by getVariableLength()
      *
      * @param string $input
      * @param int $offset
-     * @return int
+     * @return int Consumed bytes, equals getVariableLength()
      */
     public function parseAdditionalData(string $input, int $offset = 0) : int
     {
@@ -121,8 +144,160 @@ class EndOfCentralDirectory
         }
 
         $this->zipFileComment = \substr($input, $offset, $this->zipFileCommentLength);
-        $this->requireAdditionalData = null;
+        $this->requireAdditionalData = false;
 
         return $this->zipFileCommentLength;
+    }
+
+    /**
+     * The number of bytes the fields with variable length require.
+     *
+     * @return int
+     */
+    public function getVariableLength(): int
+    {
+        return $this->zipFileCommentLength;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNumberOfThisDisk(): int
+    {
+        return $this->numberOfThisDisk;
+    }
+
+    /**
+     * @param int $numberOfThisDisk
+     * @return EndOfCentralDirectory
+     */
+    public function setNumberOfThisDisk(int $numberOfThisDisk): EndOfCentralDirectory
+    {
+        $obj = clone $this;
+        $obj->numberOfThisDisk = $numberOfThisDisk;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNumberOfTheDiskWithTheStartOfTheCentralDirectory(): int
+    {
+        return $this->numberOfTheDiskWithTheStartOfTheCentralDirectory;
+    }
+
+    /**
+     * @param int $numberOfTheDiskWithTheStartOfTheCentralDirectory
+     * @return EndOfCentralDirectory
+     */
+    public function setNumberOfTheDiskWithTheStartOfTheCentralDirectory(int $numberOfTheDiskWithTheStartOfTheCentralDirectory): EndOfCentralDirectory
+    {
+        $obj = clone $this;
+        $obj->numberOfTheDiskWithTheStartOfTheCentralDirectory = $numberOfTheDiskWithTheStartOfTheCentralDirectory;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalNumberOfEntriesInTheCentralDirectoryOnThisDisk(): int
+    {
+        return $this->totalNumberOfEntriesInTheCentralDirectoryOnThisDisk;
+    }
+
+    /**
+     * @param int $totalNumberOfEntriesInTheCentralDirectoryOnThisDisk
+     * @return EndOfCentralDirectory
+     */
+    public function setTotalNumberOfEntriesInTheCentralDirectoryOnThisDisk(int $totalNumberOfEntriesInTheCentralDirectoryOnThisDisk): EndOfCentralDirectory
+    {
+        $obj = clone $this;
+        $obj->totalNumberOfEntriesInTheCentralDirectoryOnThisDisk = $totalNumberOfEntriesInTheCentralDirectoryOnThisDisk;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalNumberOfEntriesInTheCentralDirectory(): int
+    {
+        return $this->totalNumberOfEntriesInTheCentralDirectory;
+    }
+
+    /**
+     * @param int $totalNumberOfEntriesInTheCentralDirectory
+     * @return EndOfCentralDirectory
+     */
+    public function setTotalNumberOfEntriesInTheCentralDirectory(int $totalNumberOfEntriesInTheCentralDirectory): EndOfCentralDirectory
+    {
+        $obj = clone $this;
+        $obj->totalNumberOfEntriesInTheCentralDirectory = $totalNumberOfEntriesInTheCentralDirectory;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSizeOfTheCentralDirectory(): int
+    {
+        return $this->sizeOfTheCentralDirectory;
+    }
+
+    /**
+     * @param int $sizeOfTheCentralDirectory
+     * @return EndOfCentralDirectory
+     */
+    public function setSizeOfTheCentralDirectory(int $sizeOfTheCentralDirectory): EndOfCentralDirectory
+    {
+        $obj = clone $this;
+        $obj->sizeOfTheCentralDirectory = $sizeOfTheCentralDirectory;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOffsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber(): int
+    {
+        return $this->offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber;
+    }
+
+    /**
+     * @param int $offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber
+     * @return EndOfCentralDirectory
+     */
+    public function setOffsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber(int $offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber): EndOfCentralDirectory
+    {
+        $obj = clone $this;
+        $obj->offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber = $offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getZipFileCommentLength(): int
+    {
+        return $this->zipFileCommentLength;
+    }
+
+    /**
+     * @return string
+     */
+    public function getZipFileComment(): string
+    {
+        return $this->zipFileComment;
+    }
+
+    /**
+     * @param string $zipFileComment
+     * @return EndOfCentralDirectory
+     */
+    public function setZipFileComment(string $zipFileComment): EndOfCentralDirectory
+    {
+        $obj = clone $this;
+        $obj->zipFileComment = $zipFileComment;
+        $obj->zipFileCommentLength = \strlen($zipFileComment);
+        return $this;
     }
 }

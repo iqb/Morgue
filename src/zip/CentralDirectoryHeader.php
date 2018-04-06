@@ -2,7 +2,17 @@
 
 namespace iqb\zip;
 
-class CentralDirectoryHeader
+/**
+ * This class represents a "central directory header" data structure as defined in the ZIP specification.
+ * CentralDirectoryHeader objects are immutable so every setX() method will return a copy with modified fields,
+ *  the original object remains unchanged.
+ *
+ * To create a CentralDirectoryHeader from its binary representation, call the parse() method and supply
+ *  CentralDirectoryHeader::MIN_LENGTH bytes to read the fixed size fields.
+ * getVariableLength() will yield the number of bytes required to parse the variable size fields.
+ * Call parseAdditionalData() with that number of bytes will finalize the object which is immutable from that point on.
+ */
+final class CentralDirectoryHeader
 {
     const SIGNATURE = 0x504b0102;
 
@@ -24,144 +34,143 @@ class CentralDirectoryHeader
     /**
      * @var int
      */
-    public $versionMadeBy;
+    private $versionMadeBy;
 
     /**
      * @var int
      */
-    public $versionNeededToExtract;
+    private $versionNeededToExtract;
 
     /**
      * @var int
      */
-    public $generalPurposeBitFlags;
+    private $generalPurposeBitFlags;
 
     /**
      * @var int
      */
-    public $compressionMethod;
+    private $compressionMethod;
 
     /**
      * @var int
      */
-    public $lastModificationFileTime;
+    private $lastModificationFileTime;
 
     /**
      * @var int
      */
-    public $lastModificationFileDate;
+    private $lastModificationFileDate;
 
     /**
      * @var int
      */
-    public $crc32;
+    private $crc32;
 
     /**
      * @var int
      */
-    public $compressedSize;
+    private $compressedSize;
 
     /**
      * @var int
      */
-    public $uncompressedSize;
+    private $uncompressedSize;
 
     /**
      * @var int
      */
-    public $fileNameLength;
+    private $fileNameLength;
 
     /**
      * @var int
      */
-    public $extraFieldLength;
+    private $extraFieldLength;
 
     /**
      * @var int
      */
-    public $fileCommentLength;
+    private $fileCommentLength;
 
     /**
      * @var int
      */
-    public $diskNumberStart;
+    private $diskNumberStart;
 
     /**
      * @var int
      */
-    public $internalFileAttributes;
+    private $internalFileAttributes;
 
     /**
      * @var int
      */
-    public $externalFileAttributes;
+    private $externalFileAttributes;
 
     /**
      * @var int
      */
-    public $relativeOffsetOfLocalHeader;
+    private $relativeOffsetOfLocalHeader;
 
     /**
      * @var string
      */
-    public $fileName = "";
+    private $fileName = "";
 
     /**
      * @var string
      */
-    public $extraField = "";
+    private $extraField = "";
 
     /**
      * @var string
      */
-    public $fileComment = "";
+    private $fileComment = "";
 
     /**
      * File system or operating system of encoder.
      * One of the HOST_COMPATIBILITY_* constants.
      * @var int
      */
-    public $encodingHost;
+    private $encodingHost;
 
     /**
      * Maximum supported version of the encoding software.
      * @var int
      */
-    public $encodingVersion;
+    private $encodingVersion;
 
     /**
      * Required host compatibility to decode.
      * One of the HOST_COMPATIBILITY_* constants.
      * @var int
      */
-    public $requiredHost;
+    private $requiredHost;
 
     /**
      * Zip format version required to decode.
      * @var int
      */
-    public $requiredVersion;
+    private $requiredVersion;
 
     /**
      * @var \DateTimeInterface
      */
-    public $lastModification;
+    private $lastModification;
 
     /**
      * @var int
      */
-    public $dosExternalAttributes;
+    private $dosExternalAttributes;
 
     /**
      * @var int
      */
-    public $unixExternalAttributes;
+    private $unixExternalAttributes;
 
     /**
-     * @var int
+     * @var bool
      */
-    public $requireAdditionalData;
-
+    private $requireAdditionalData = false;
 
     public function __construct(
         int $versionMadeBy,
@@ -221,7 +230,15 @@ class CentralDirectoryHeader
         }
     }
 
-
+    /**
+     * Parse the binary representation of a central directory header from $input, optionally start at $offset instead of the beginning of the string.
+     * To complete the parsing process, parseAdditionalData() must be called with at least the number of bytes as input as returned by getRequireAdditionalData().
+     * After the parseAdditionalData() call the object is immutable.
+     *
+     * @param string $input
+     * @param int $offset
+     * @return CentralDirectoryHeader
+     */
     public static function parse(string $input, int $offset = 0)
     {
         if (\strlen($input) < ($offset+self::MIN_LENGTH)) {
@@ -270,11 +287,10 @@ class CentralDirectoryHeader
         $centralDirectoryHeader->fileNameLength = $parsed['fileNameLength'];
         $centralDirectoryHeader->extraFieldLength = $parsed['extraFieldLength'];
         $centralDirectoryHeader->fileCommentLength = $parsed['fileCommentLength'];
-        $centralDirectoryHeader->requireAdditionalData = $centralDirectoryHeader->fileNameLength + $centralDirectoryHeader->extraFieldLength + $centralDirectoryHeader->fileCommentLength;
+        $centralDirectoryHeader->requireAdditionalData = ($centralDirectoryHeader->fileNameLength + $centralDirectoryHeader->extraFieldLength + $centralDirectoryHeader->fileCommentLength > 0);
 
         return $centralDirectoryHeader;
     }
-
 
     /**
      * After a new object has been created by parse(), this method must be called to initialize the file name, extra field and file comment entries which have dynamic field length.
@@ -282,7 +298,7 @@ class CentralDirectoryHeader
      *
      * @param string $input
      * @param int $offset
-     * @return int
+     * @return int The number of bytes consumed (equals getVariableLength())
      */
     public function parseAdditionalData(string $input, int $offset = 0) : int
     {
@@ -290,18 +306,495 @@ class CentralDirectoryHeader
             throw new \BadMethodCallException("No additional data required!");
         }
 
-        if (\strlen($input) < ($offset + $this->fileNameLength + $this->extraFieldLength + $this->fileCommentLength)) {
+        $variableLength = $this->fileNameLength + $this->extraFieldLength + $this->fileCommentLength;
+
+        if (\strlen($input) < ($offset + $variableLength)) {
             throw new \InvalidArgumentException("Not enough input to parse additional data!");
         }
 
         $this->fileName = \substr($input, $offset, $this->fileNameLength);
-        $this->extraField = bin2hex(\substr($input, $offset+$this->fileNameLength, $this->extraFieldLength));
-        $this->fileComment = \substr($input, $offset+$this->fileNameLength+$this->extraFieldLength, $this->fileCommentLength);
-        $this->requireAdditionalData = null;
+        $offset += $this->fileNameLength;
+        $this->extraField = bin2hex(\substr($input, $offset, $this->extraFieldLength));
+        $offset += $this->extraFieldLength;
+        $this->fileComment = \substr($input, $offset, $this->fileCommentLength);
+        $this->requireAdditionalData = false;
 
+        return $variableLength;
+    }
+
+    /**
+     * The number of bytes the fields with variable length require.
+     *
+     * @return int
+     */
+    public function getVariableLength(): int
+    {
         return $this->fileNameLength + $this->extraFieldLength + $this->fileCommentLength;
     }
 
+    /**
+     * @return int
+     */
+    public function getVersionMadeBy(): int
+    {
+        return $this->versionMadeBy;
+    }
+
+    /**
+     * @param int $versionMadeBy
+     * @return CentralDirectoryHeader
+     */
+    public function setVersionMadeBy(int $versionMadeBy): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->versionMadeBy = $versionMadeBy;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getVersionNeededToExtract(): int
+    {
+        return $this->versionNeededToExtract;
+    }
+
+    /**
+     * @param int $versionNeededToExtract
+     * @return CentralDirectoryHeader
+     */
+    public function setVersionNeededToExtract(int $versionNeededToExtract): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->versionNeededToExtract = $versionNeededToExtract;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGeneralPurposeBitFlags(): int
+    {
+        return $this->generalPurposeBitFlags;
+    }
+
+    /**
+     * @param int $generalPurposeBitFlags
+     * @return CentralDirectoryHeader
+     */
+    public function setGeneralPurposeBitFlags(int $generalPurposeBitFlags): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->generalPurposeBitFlags = $generalPurposeBitFlags;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCompressionMethod(): int
+    {
+        return $this->compressionMethod;
+    }
+
+    /**
+     * @param int $compressionMethod
+     * @return CentralDirectoryHeader
+     */
+    public function setCompressionMethod(int $compressionMethod): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->compressionMethod = $compressionMethod;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastModificationFileTime(): int
+    {
+        return $this->lastModificationFileTime;
+    }
+
+    /**
+     * @param int $lastModificationFileTime
+     * @return CentralDirectoryHeader
+     */
+    public function setLastModificationFileTime(int $lastModificationFileTime): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->lastModificationFileTime = $lastModificationFileTime;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastModificationFileDate(): int
+    {
+        return $this->lastModificationFileDate;
+    }
+
+    /**
+     * @param int $lastModificationFileDate
+     * @return CentralDirectoryHeader
+     */
+    public function setLastModificationFileDate(int $lastModificationFileDate): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->lastModificationFileDate = $lastModificationFileDate;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCrc32(): int
+    {
+        return $this->crc32;
+    }
+
+    /**
+     * @param int $crc32
+     * @return CentralDirectoryHeader
+     */
+    public function setCrc32(int $crc32): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->crc32 = $crc32;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCompressedSize(): int
+    {
+        return $this->compressedSize;
+    }
+
+    /**
+     * @param int $compressedSize
+     * @return CentralDirectoryHeader
+     */
+    public function setCompressedSize(int $compressedSize): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->compressedSize = $compressedSize;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUncompressedSize(): int
+    {
+        return $this->uncompressedSize;
+    }
+
+    /**
+     * @param int $uncompressedSize
+     * @return CentralDirectoryHeader
+     */
+    public function setUncompressedSize(int $uncompressedSize): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->uncompressedSize = $uncompressedSize;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFileNameLength(): int
+    {
+        return $this->fileNameLength;
+    }
+
+    /**
+     * @return int
+     */
+    public function getExtraFieldLength(): int
+    {
+        return $this->extraFieldLength;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFileCommentLength(): int
+    {
+        return $this->fileCommentLength;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDiskNumberStart(): int
+    {
+        return $this->diskNumberStart;
+    }
+
+    /**
+     * @param int $diskNumberStart
+     * @return CentralDirectoryHeader
+     */
+    public function setDiskNumberStart(int $diskNumberStart): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->diskNumberStart = $diskNumberStart;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getInternalFileAttributes(): int
+    {
+        return $this->internalFileAttributes;
+    }
+
+    /**
+     * @param int $internalFileAttributes
+     * @return CentralDirectoryHeader
+     */
+    public function setInternalFileAttributes(int $internalFileAttributes): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->internalFileAttributes = $internalFileAttributes;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getExternalFileAttributes(): int
+    {
+        return $this->externalFileAttributes;
+    }
+
+    /**
+     * @param int $externalFileAttributes
+     * @return CentralDirectoryHeader
+     */
+    public function setExternalFileAttributes(int $externalFileAttributes): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->externalFileAttributes = $externalFileAttributes;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRelativeOffsetOfLocalHeader(): int
+    {
+        return $this->relativeOffsetOfLocalHeader;
+    }
+
+    /**
+     * @param int $relativeOffsetOfLocalHeader
+     * @return CentralDirectoryHeader
+     */
+    public function setRelativeOffsetOfLocalHeader(int $relativeOffsetOfLocalHeader): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->relativeOffsetOfLocalHeader = $relativeOffsetOfLocalHeader;
+        return $obj;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileName(): string
+    {
+        return $this->fileName;
+    }
+
+    /**
+     * @param string $fileName
+     * @return CentralDirectoryHeader
+     */
+    public function setFileName(string $fileName): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->fileName = $fileName;
+        $obj->fileNameLength = \strlen($fileName);
+        return $obj;
+    }
+
+    /**
+     * @return string
+     */
+    public function getExtraField(): string
+    {
+        return $this->extraField;
+    }
+
+    /**
+     * @param string $extraField
+     * @return CentralDirectoryHeader
+     */
+    public function setExtraField(string $extraField): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->extraField = $extraField;
+        $obj->extraFieldLength = \strlen($extraField);
+        return $obj;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileComment(): string
+    {
+        return $this->fileComment;
+    }
+
+    /**
+     * @param string $fileComment
+     * @return CentralDirectoryHeader
+     */
+    public function setFileComment(string $fileComment): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->fileComment = $fileComment;
+        $obj->fileCommentLength = \strlen($fileComment);
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getEncodingHost(): int
+    {
+        return $this->encodingHost;
+    }
+
+    /**
+     * @param int $encodingHost
+     * @return CentralDirectoryHeader
+     */
+    public function setEncodingHost(int $encodingHost): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->encodingHost = $encodingHost;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getEncodingVersion(): int
+    {
+        return $this->encodingVersion;
+    }
+
+    /**
+     * @param int $encodingVersion
+     * @return CentralDirectoryHeader
+     */
+    public function setEncodingVersion(int $encodingVersion): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->encodingVersion = $encodingVersion;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRequiredHost(): int
+    {
+        return $this->requiredHost;
+    }
+
+    /**
+     * @param int $requiredHost
+     * @return CentralDirectoryHeader
+     */
+    public function setRequiredHost(int $requiredHost): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->requiredHost = $requiredHost;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRequiredVersion(): int
+    {
+        return $this->requiredVersion;
+    }
+
+    /**
+     * @param int $requiredVersion
+     * @return CentralDirectoryHeader
+     */
+    public function setRequiredVersion(int $requiredVersion): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->requiredVersion = $requiredVersion;
+        return $obj;
+    }
+
+    /**
+     * @return \DateTimeInterface
+     */
+    public function getLastModification(): \DateTimeInterface
+    {
+        return $this->lastModification;
+    }
+
+    /**
+     * @param \DateTimeInterface $lastModification
+     * @return CentralDirectoryHeader
+     */
+    public function setLastModification(\DateTimeInterface $lastModification): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->lastModification = $lastModification;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDosExternalAttributes(): int
+    {
+        return $this->dosExternalAttributes;
+    }
+
+    /**
+     * @param int $dosExternalAttributes
+     * @return CentralDirectoryHeader
+     */
+    public function setDosExternalAttributes(int $dosExternalAttributes): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->dosExternalAttributes = $dosExternalAttributes;
+        return $obj;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUnixExternalAttributes(): int
+    {
+        return $this->unixExternalAttributes;
+    }
+
+    /**
+     * @param int $unixExternalAttributes
+     * @return CentralDirectoryHeader
+     */
+    public function setUnixExternalAttributes(int $unixExternalAttributes): CentralDirectoryHeader
+    {
+        $obj = clone $this;
+        $obj->unixExternalAttributes = $unixExternalAttributes;
+        return $obj;
+    }
 
     /**
      * Whether this entry represents a directory or not
