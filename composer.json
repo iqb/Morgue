@@ -7,7 +7,7 @@
             "email": "dennis@birkholz.org"
         }
     ],
-    "license": "LGPL-3",
+    "license": "LGPL-3.0-or-later",
     "autoload": {
         "psr-4": {
             "iqb\\": "src/"
