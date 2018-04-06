@@ -105,6 +105,7 @@ final class LocalFileHeader
         $this->compressionMethod = $compressionMethod;
         $this->lastModificationFileTime = $lastModificationFileTime;
         $this->lastModificationFileDate = $lastModificationFileDate;
+        $this->crc32 = $crc32;
         $this->compressedSize = $compressedSize;
         $this->uncompressedSize = $uncompressedSize;
 

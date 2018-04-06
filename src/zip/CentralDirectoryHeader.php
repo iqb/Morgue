@@ -785,9 +785,9 @@ final class CentralDirectoryHeader
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getUnixExternalAttributes(): int
+    public function getUnixExternalAttributes()
     {
         return $this->unixExternalAttributes;
     }

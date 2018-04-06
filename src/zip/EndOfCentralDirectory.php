@@ -175,7 +175,7 @@ final class EndOfCentralDirectory
     {
         $obj = clone $this;
         $obj->numberOfThisDisk = $numberOfThisDisk;
-        return $this;
+        return $obj;
     }
 
     /**
@@ -194,7 +194,7 @@ final class EndOfCentralDirectory
     {
         $obj = clone $this;
         $obj->numberOfTheDiskWithTheStartOfTheCentralDirectory = $numberOfTheDiskWithTheStartOfTheCentralDirectory;
-        return $this;
+        return $obj;
     }
 
     /**
@@ -213,7 +213,7 @@ final class EndOfCentralDirectory
     {
         $obj = clone $this;
         $obj->totalNumberOfEntriesInTheCentralDirectoryOnThisDisk = $totalNumberOfEntriesInTheCentralDirectoryOnThisDisk;
-        return $this;
+        return $obj;
     }
 
     /**
@@ -232,7 +232,7 @@ final class EndOfCentralDirectory
     {
         $obj = clone $this;
         $obj->totalNumberOfEntriesInTheCentralDirectory = $totalNumberOfEntriesInTheCentralDirectory;
-        return $this;
+        return $obj;
     }
 
     /**
@@ -251,7 +251,7 @@ final class EndOfCentralDirectory
     {
         $obj = clone $this;
         $obj->sizeOfTheCentralDirectory = $sizeOfTheCentralDirectory;
-        return $this;
+        return $obj;
     }
 
     /**
@@ -270,7 +270,7 @@ final class EndOfCentralDirectory
     {
         $obj = clone $this;
         $obj->offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber = $offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber;
-        return $this;
+        return $obj;
     }
 
     /**
@@ -298,6 +298,6 @@ final class EndOfCentralDirectory
         $obj = clone $this;
         $obj->zipFileComment = $zipFileComment;
         $obj->zipFileCommentLength = \strlen($zipFileComment);
-        return $this;
+        return $obj;
     }
 }
