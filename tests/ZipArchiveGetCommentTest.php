@@ -43,16 +43,16 @@ class ZipArchiveGetCommentTest extends ZipArchiveTestBase
      */
     public function testGetFrom(string $methodName, string $fileName, $qualifier, int $flags)
     {
-        $this->runMethodTest($methodName, $fileName, $qualifier, $flags);
+        $this->runMethodTest($methodName, $fileName, [$qualifier, $flags]);
     }
 
     public function testInvalidIndex()
     {
-        $this->runMethodTest('getCommentIndex', self::ZIP_COMMENTS, 49);
+        $this->runMethodTest('getCommentIndex', self::ZIP_COMMENTS, [49]);
     }
 
     public function testInvalidName()
     {
-        $this->runMethodTest('getCommentName', self::ZIP_COMMENTS, 'this/file/really/does/not/exists.txt');
+        $this->runMethodTest('getCommentName', self::ZIP_COMMENTS, ['this/file/really/does/not/exists.txt']);
     }
 }

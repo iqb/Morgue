@@ -62,14 +62,14 @@ abstract class ZipArchiveTestBase extends TestCase
         return $flags;
     }
 
-    final protected function runMethodTest(string $methodName, string $fileName, ...$parameters)
+    final protected function runMethodTest(string $methodName, string $fileName, array $parameters, string $assertMethod = 'assertSame')
     {
         $zipExt = new \ZipArchive();
         $zipExt->open($fileName);
         $zipPkg = new ZipArchive();
         $zipPkg->open($fileName);
 
-        $this->assertSame($zipExt->$methodName(...$parameters), $zipPkg->$methodName(...$parameters), "method call");
+        $this->$assertMethod($zipExt->$methodName(...$parameters), $zipPkg->$methodName(...$parameters), "method call");
         $this->assertZipArchiveStatus($zipExt, $zipPkg);
     }
 
