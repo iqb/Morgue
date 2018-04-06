@@ -6,9 +6,9 @@ use PHPUnit\Framework\TestCase;
 
 class ZipArchiveTest extends TestCase
 {
-    private $zipFileNoExtras = __DIR__ . '/test-no-extras.zip';
-    private $zipFileComments = __DIR__ . '/comments.zip';
-    private $zipFileNoComment = __DIR__ . '/nocomment.zip';
+    private $zipFileNoExtras  = __DIR__ . '/archives/no-extra-fields.zip';
+    private $zipFileComments  = __DIR__ . '/archives/archive-and-file-comments.zip';
+    private $zipFileNoComment = __DIR__ . '/archives/archive-and-file-comments-empty.zip';
 
 
     /**

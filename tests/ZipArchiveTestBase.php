@@ -10,8 +10,40 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class ZipArchiveTestBase extends TestCase
 {
-    const ZIP_NO_EXTRAS = __DIR__ . '/test-no-extras.zip';
-    const ZIP_COMMENTS = __DIR__ . '/comments.zip';
+    /**
+     * A test file without extra fields set (so no UNIX timestamp, etc.)
+     */
+    const ZIP_NO_EXTRAS = __DIR__ . '/archives/no-extra-fields.zip';
+
+    /**
+     * A test file containing an archive comment and some file comments
+     */
+    const ZIP_COMMENTS = __DIR__ . '/archives/archive-and-file-comments.zip';
+
+    /**
+     * A test file where all comments are empty
+     */
+    const ZIP_NO_COMMENTS = __DIR__ . '/archives/archive-and-file-comments-empty.zip';
+
+    /**
+     * A test file containing a large file (~16GB) of zeros to force ZIP64 structure, compressed with BZip2
+     */
+    const ZIP_ZIP64 = __DIR__ . '/archives/zip64-bzip2.zip';
+
+    /**
+     * A test file containing a file with STORE compression method
+     */
+    const ZIP_STORE = __DIR__ . '/archives/method-store.zip';
+
+    /**
+     * A test file containing a file with deflate compression method
+     */
+    const ZIP_DEFLATE = __DIR__ . '/archives/method-deflate.zip';
+
+    /**
+     * A test file containing a file with BZip2 compression method
+     */
+    const ZIP_BZIP2 = __DIR__ . '/archives/method-bzip2.zip';
 
     public function setUp()
     {
