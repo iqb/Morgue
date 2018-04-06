@@ -11,18 +11,6 @@ class ZipArchiveTest extends TestCase
     private $zipFileNoComment = __DIR__ . '/nocomment.zip';
 
 
-    public function setUp()
-    {
-        parent::setUp();
-
-        // DOS date+time is stored as a local timezone variable, not UTC
-        // libzip uses TZ environment variable to get the timezone whereas this package uses the PHP internal date timezone
-        // Set both to UTC to avoid test problems system timezone settings
-        \date_default_timezone_set('UTC');
-        \putenv("TZ=UTC");
-    }
-
-
     /**
      * Helper function for data providers: generate an Iterator that returns an entry for file from the supplied ZIP file.
      * Entry-format: "$index: $name" => [$fileName, $index, $name]
@@ -194,46 +182,5 @@ class ZipArchiveTest extends TestCase
     public function testLocateNameUnmodified(string $fileName, int $index, string $name)
     {
         $this->compareMethodResults($fileName, 'locateName', $this->createNameAndFlagsParameterLists($name), 'assertSame');
-    }
-
-
-    /**
-     * Tests statIndex() on unmodified zip file.
-     * @dataProvider noExtrasZipFileProvider
-     */
-    public function testStatUnmodified(string $fileName, int $index, string $name)
-    {
-        $fromExt = new \ZipArchive();
-        $fromExt->open($fileName);
-
-        $fromPkg = new ZipArchive();
-        $fromPkg->open($fileName);
-
-        $refStat = $fromExt->statIndex($index);
-        $pkgStat = $fromPkg->statIndex($index);
-
-        $this->assertStat($refStat, $pkgStat, "Testing: $name");
-    }
-
-
-    /**
-     * Tests statName() on unmodified zip file.
-     * @dataProvider noExtrasZipFileProvider
-     */
-    public function testStatNameUnmodified(string $fileName, int $index, string $name)
-    {
-        $this->compareMethodResults($fileName, 'statName', $this->createNameAndFlagsParameterLists($name), 'assertStat');
-    }
-
-    /**
-     * encryption_method field depends on ext-zip version (>= 1.14.0) and version of libzip (>= 1.2.0)
-     */
-    private function assertStat($expected, $actual, $message)
-    {
-        if (is_array($expected) && is_Array($actual) && !isset($expected['encryption_method'])) {
-            unset($actual['encryption_method']);
-        }
-
-        $this->assertEquals($expected, $actual, $message);
     }
 }

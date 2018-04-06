@@ -13,6 +13,17 @@ abstract class ZipArchiveTestBase extends TestCase
     const ZIP_NO_EXTRAS = __DIR__ . '/test-no-extras.zip';
     const ZIP_COMMENTS = __DIR__ . '/comments.zip';
 
+    public function setUp()
+    {
+        parent::setUp();
+
+        // DOS date+time is stored as a local timezone variable, not UTC
+        // libzip uses TZ environment variable to get the timezone whereas this package uses the PHP internal date timezone
+        // Set both to UTC to avoid test problems system timezone settings
+        \date_default_timezone_set('UTC');
+        \putenv("TZ=UTC");
+    }
+
     /**
      * Get all file names with their index from an archive
      *
