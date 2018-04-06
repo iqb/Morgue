@@ -32,7 +32,7 @@ class ZipArchiveGetFromTest extends ZipArchiveTestBase
             foreach ($filelist as $qualifier) {
                 foreach ($offsets as $offset) {
                     foreach ($flags as $flagName => $flagValue) {
-                        $data["$method(), $basename, $qualifier, ".(\is_null($offset) ? 'null' : $offset).", $flagName"] = [$method, self::ZIP_NO_EXTRAS, $qualifier, $offset, $flagValue];
+                        $data["$method(), $basename, $qualifier, ".(\is_null($offset) ? 'null' : $offset).", $flagName"] = [$method, $fileName, $qualifier, $offset, $flagValue];
                     }
                 }
             }

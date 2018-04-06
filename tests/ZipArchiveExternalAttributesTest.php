@@ -30,7 +30,7 @@ class ZipArchiveExternalAttributesTest extends ZipArchiveTestBase
         foreach ($methods as $method => list($flags, $filelist)) {
             foreach ($filelist as $qualifier) {
                 foreach ($flags as $flagName => $flagValue) {
-                    $data["$method(), $basename, $qualifier, $flagName"] = [$method, self::ZIP_NO_EXTRAS, $qualifier, $flagValue];
+                    $data["$method(), $basename, $qualifier, $flagName"] = [$method, $fileName, $qualifier, $flagValue];
                 }
             }
         }
