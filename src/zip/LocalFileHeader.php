@@ -52,10 +52,10 @@ class LocalFileHeader
     public $extraFieldLength;
 
     /// @var string
-    public $fileName;
+    public $fileName = "";
 
     /// @var string
-    public $extraField;
+    public $extraField = "";
 
     /// @var int
     public $requireAdditionalData;
@@ -153,10 +153,6 @@ class LocalFileHeader
      */
     public function parseAdditionalData(string $input, int $offset = 0) : int
     {
-        if ($this->fileName !== null || $this->extraField !== null) {
-            throw new \BadMethodCallException("Additional data already parsed!");
-        }
-
         if (!$this->requireAdditionalData) {
             throw new \BadMethodCallException("No additional data required!");
         }

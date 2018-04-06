@@ -29,7 +29,7 @@ class EndOfCentralDirectory
 
     public $zipFileCommentLength;
 
-    public $zipFileComment;
+    public $zipFileComment = "";
 
     /// @var int
     public $requireAdditionalData;
@@ -112,10 +112,6 @@ class EndOfCentralDirectory
      */
     public function parseAdditionalData(string $input, int $offset = 0) : int
     {
-        if ($this->zipFileComment !== null) {
-            throw new \BadMethodCallException("Additional data already parsed!");
-        }
-
         if (!$this->requireAdditionalData) {
             throw new \BadMethodCallException("No additional data required!");
         }

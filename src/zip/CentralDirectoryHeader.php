@@ -104,17 +104,17 @@ class CentralDirectoryHeader
     /**
      * @var string
      */
-    public $fileName;
+    public $fileName = "";
 
     /**
      * @var string
      */
-    public $extraField;
+    public $extraField = "";
 
     /**
      * @var string
      */
-    public $fileComment;
+    public $fileComment = "";
 
     /**
      * File system or operating system of encoder.
@@ -286,10 +286,6 @@ class CentralDirectoryHeader
      */
     public function parseAdditionalData(string $input, int $offset = 0) : int
     {
-        if ($this->fileName !== null || $this->extraField !== null || $this->fileComment !== null) {
-            throw new \BadMethodCallException("Additional data already parsed!");
-        }
-
         if (!$this->requireAdditionalData) {
             throw new \BadMethodCallException("No additional data required!");
         }
