@@ -745,7 +745,7 @@ class ZipArchive implements \Countable
      */
     final public function getFromName(string $name, int $length = null, int $flags = null)
     {
-        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_COMPRESSED|self::FL_UNCHANGED));
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_COMPRESSED|self::FL_NOCASE|self::FL_NODIR|self::FL_UNCHANGED));
 
         if (($index = $this->locateName($name, $validFlags)) === false) {
             return false;
@@ -797,15 +797,15 @@ class ZipArchive implements \Countable
     final public function getStreamIndex(int $index, int $flags = null)
     {
         $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_COMPRESSED|self::FL_UNCHANGED));
+        $directory = ($validFlags & self::FL_UNCHANGED ? $this->originalCentralDirectory : $this->modifiedCentralDirectory);
 
-        if (!isset($this->originalCentralDirectory[$index])) {
+        if (!isset($directory[$index])) {
             return false;
-        } else {
-            $entry = $this->originalCentralDirectory[$index];
         }
+        $entry = $directory[$index];
 
         if ($entry->getCompressedSize() === 0) {
-            return false;
+            return \fopen('php://memory', 'r');
         }
 
         \fseek($this->handle, $entry->getRelativeOffsetOfLocalHeader());

@@ -201,46 +201,6 @@ class ZipArchiveTest extends TestCase
     /**
      * @dataProvider noExtrasZipFileProvider
      */
-    public function testGetFromIndex(string $fileName, int $index, string $name)
-    {
-        $this->compareMethodResults($fileName, 'getFromIndex', [
-            [$index],
-            [$index, null, \ZipArchive::FL_COMPRESSED],
-            [$index, 0],
-            [$index, 0, \ZipArchive::FL_COMPRESSED],
-            [$index, 64],
-            [$index, 64, \ZipArchive::FL_COMPRESSED],
-            [$index, 600],
-            [$index, 600, \ZipArchive::FL_COMPRESSED],
-            [$index, 100000],
-            [$index, 100000, \ZipArchive::FL_COMPRESSED],
-        ], 'assertEquals');
-    }
-
-
-    /**
-     * @dataProvider noExtrasZipFileProvider
-     */
-    public function testGetFromName(string $fileName, int $index, string $name)
-    {
-        $this->compareMethodResults($fileName, 'getFromName', [
-            [$name],
-            [$name, null, \ZipArchive::FL_COMPRESSED],
-            [$name, 0],
-            [$name, 0, \ZipArchive::FL_COMPRESSED],
-            [$name, 64],
-            [$name, 64, \ZipArchive::FL_COMPRESSED],
-            [$name, 600],
-            [$name, 600, \ZipArchive::FL_COMPRESSED],
-            [$name, 100000],
-            [$name, 100000, \ZipArchive::FL_COMPRESSED],
-        ], 'assertEquals');
-    }
-
-
-    /**
-     * @dataProvider noExtrasZipFileProvider
-     */
     public function testGetStream(string $fileName, int $index, string $name)
     {
         $this->compareMethodResults($fileName, 'getStream', [[$fileName]], 'assertSame');
