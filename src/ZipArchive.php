@@ -651,6 +651,56 @@ class ZipArchive implements \Countable
 
 
     /**
+     * Retrieve the external attributes of an entry defined by its index
+     *
+     * @param int $index Index of the entry.
+     * @param int $opsys On success, receive the operating system code defined by one of the ZipArchive::OPSYS_ constants.
+     * @param int $attr On success, receive the external attributes. Value depends on operating system.
+     * @param int $flags ZipArchive::FL_UNCHANGED or 0
+     * @return bool
+     *
+     * @link http://php.net/manual/en/ziparchive.getexternalattributesindex.php
+     */
+    final public function getExternalAttributesIndex(int $index, &$opsys, &$attr, int $flags = null)
+    {
+        $validFlags = (is_null($flags) ? 0 : $flags & self::FL_UNCHANGED);
+        $directory = ($validFlags & self::FL_UNCHANGED ? $this->originalCentralDirectory : $this->modifiedCentralDirectory);
+
+        if (!isset($directory[$index])) {
+            return false;
+        }
+
+        $opsys = $directory[$index]->getEncodingHost();
+        $attr = $directory[$index]->getExternalFileAttributes();
+
+        return true;
+    }
+
+
+    /**
+     * Retrieve the external attributes of an entry defined by its name
+     *
+     * @param string $name Name of the entry.
+     * @param int $opsys On success, receive the operating system code defined by one of the ZipArchive::OPSYS_ constants.
+     * @param int $attr On success, receive the external attributes. Value depends on operating system.
+     * @param int $flags ZipArchive::FL_UNCHANGED or 0
+     * @return bool
+     *
+     * @link http://php.net/manual/en/ziparchive.getexternalattributesname.php
+     */
+    final public function getExternalAttributesName(string $name, &$opsys, &$attr, int $flags = null)
+    {
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_UNCHANGED));
+
+        if (($index = $this->locateName($name, $validFlags)) !== false) {
+            return $this->getExternalAttributesIndex($index, $opsys, $attr, $flags);
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
      * Returns the entry contents using its index
      *
      * @param int $index Index of the entry
@@ -702,6 +752,24 @@ class ZipArchive implements \Countable
         }
 
         return $this->getFromIndex($index, $length, $validFlags);
+    }
+
+
+    /**
+     * @return string
+     */
+    final public function getStatusString()
+    {
+        switch ($this->status) {
+            case self::ER_OK:
+                return "No error";
+
+            case self::ER_NOENT:
+                return "No such file";
+
+            default:
+                return "";
+        }
     }
 
 
