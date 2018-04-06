@@ -2,6 +2,9 @@
 
 namespace iqb\zip;
 
+const MAX_INT_16 = 0xFFFF;
+const MAX_INT_32 = 0xFFFFFFFF;
+
 // from zip file specification:
 //    4.4.2.1 The upper byte indicates the compatibility of the file
 //        attribute information.  If the external file attributes

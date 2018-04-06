@@ -172,6 +172,11 @@ final class CentralDirectoryHeader
      */
     private $requireAdditionalData = false;
 
+    /**
+     * @var ExtraFieldInterface[]
+     */
+    private $extraFields = [];
+
     public function __construct(
         int $versionMadeBy,
         int $versionNeededToExtract,
@@ -314,8 +319,10 @@ final class CentralDirectoryHeader
 
         $this->fileName = \substr($input, $offset, $this->fileNameLength);
         $offset += $this->fileNameLength;
-        $this->extraField = bin2hex(\substr($input, $offset, $this->extraFieldLength));
+        $extraField = \substr($input, $offset, $this->extraFieldLength);
+        $this->extraField = bin2hex($extraField);
         $offset += $this->extraFieldLength;
+        $this->extraFields = ExtraField::parseAll($extraField, $this);
         $this->fileComment = \substr($input, $offset, $this->fileCommentLength);
         $this->requireAdditionalData = false;
 
