@@ -8,10 +8,17 @@ use iqb\zip\EndOfCentralDirectory;
 use iqb\zip\LocalFileHeader;
 
 /**
+ *
+ * @property-read int $status Status of the Zip Archive
+ * @property-read int statusSys System status of the Zip Archive
+ * @property-read int numFiles Number of files in the archive
+ * @property-read string $comment Comment for the archive
+ * @property-read string $filename File name in the file system
+ *
  * @link http://php.net/manual/en/class.ziparchive.php
  * @link http://php.net/manual/en/zip.constants.php
  */
-class ZipArchive
+class ZipArchive implements \Countable
 {
     // Flags for open
 
@@ -424,34 +431,22 @@ class ZipArchive
 
 
     /**
-     * Number of files in archive
-     * @var int
-     */
-    public $numFiles;
-
-    /**
      * Status of the Zip Archive
      * @var int
      */
-    public $status = 0;
+    private $status = 0;
 
     /**
      * System status of the Zip Archive
      * @var int
      */
-    public $statusSys = 0;
+    private $statusSys = 0;
 
     /**
      * File name in the file system
      * @var string
      */
-    public $filename;
-
-    /**
-     * Comment for the archive
-     * @var string
-     */
-    public $comment;
+    private $filename;
 
     /**
      * @var resource
@@ -482,6 +477,43 @@ class ZipArchive
     }
 
 
+    /**
+     * Emulate read-only access to class variables
+     */
+    public function __get(string $name)
+    {
+        if ($name === 'status') {
+            return $this->status;
+        } elseif ($name === 'statusSys') {
+            return $this->statusSys;
+        } elseif ($name === 'filename') {
+            return $this->filename;
+        } elseif ($name === 'numFiles') {
+            return $this->count();
+        } elseif ($name === 'comment') {
+            return $this->getArchiveComment();
+        }
+    }
+
+
+    /**
+     * Emulate writes that vanish into the air for class variables
+     */
+    public function __set(string $name, $value)
+    {
+    }
+
+
+    /**
+     * @implements \Countable
+     * @return int
+     */
+    public function count()
+    {
+        return \count($this->modifiedCentralDirectory);
+    }
+
+
     public function open(string $filename)
     {
         $this->filename = \realpath($filename);
@@ -489,6 +521,7 @@ class ZipArchive
 
         // Find end of central directory
         $this->originalEndOfCentralDirectory = $this->findEndOfCentralDirectory();
+        $this->modifiedEndOfCentralDirectory = clone $this->originalEndOfCentralDirectory;
         $this->comment = $this->originalEndOfCentralDirectory->zipFileComment;
 
         // Read central directory
@@ -508,7 +541,8 @@ class ZipArchive
             }
 
             $this->originalCentralDirectory[] = $centralDirectoryEntry;
-            $this->originalCentralDirectoryNameToIndexMapping[$centralDirectoryEntry->fileName] = $i;
+            $this->modifiedCentralDirectory[] = clone $centralDirectoryEntry;
+            $this->modifiedIndices[] = false;
         }
 
         $this->numFiles = \count($this->originalCentralDirectory);
@@ -557,10 +591,12 @@ class ZipArchive
     {
         $validFlags = (is_null($flags) ? 0 : $flags & self::FL_UNCHANGED);
 
-        if ($this->originalEndOfCentralDirectory->zipFileCommentLength > 0) {
+        if ($validFlags & self::FL_UNCHANGED) {
             return $this->originalEndOfCentralDirectory->zipFileComment;
-        } else {
-            return false;
+        }
+
+        else {
+            return $this->modifiedEndOfCentralDirectory->zipFileComment;
         }
     }
 
@@ -577,9 +613,10 @@ class ZipArchive
     final public function getCommentIndex(int $index, int $flags = null)
     {
         $validFlags = (is_null($flags) ? 0 : $flags & self::FL_UNCHANGED);
+        $directory = ($validFlags & self::FL_UNCHANGED ? $this->originalCentralDirectory : $this->modifiedCentralDirectory);
 
-        if (isset($this->originalCentralDirectory[$index])) {
-            return $this->originalCentralDirectory[$index]->fileComment;
+        if (isset($directory[$index])) {
+            return $directory[$index]->fileComment;
         } else {
             return false;
         }
@@ -736,10 +773,6 @@ class ZipArchive
 
         $ignoreCase = (($validFlags & self::FL_NOCASE) !== 0);
         $ignoreDir = (($validFlags & self::FL_NODIR) !== 0);
-
-        if (!$ignoreCase && !$ignoreDir && isset($this->originalCentralDirectoryNameToIndexMapping[$name])) {
-            return $this->originalCentralDirectoryNameToIndexMapping[$name];
-        }
 
         $name = ($ignoreCase ? \strtolower($name) : $name);
 

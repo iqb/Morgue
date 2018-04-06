@@ -8,6 +8,7 @@ class ZipArchiveTest extends TestCase
 {
     private $zipFileNoExtras = __DIR__ . '/test-no-extras.zip';
     private $zipFileComments = __DIR__ . '/comments.zip';
+    private $zipFileNoComment = __DIR__ . '/nocomment.zip';
 
 
     public function setUp()
@@ -151,13 +152,29 @@ class ZipArchiveTest extends TestCase
 
     public function testGetArchiveComment()
     {
-        $fromExt = new \ZipArchive();
-        $fromExt->open($this->zipFileComments);
+        $myComment = "Foobar";
+        $files = [$this->zipFileComments, $this->zipFileNoComment];
 
-        $fromPkg = new ZipArchive();
-        $fromPkg->open($this->zipFileComments);
+        foreach ($files as $filename) {
+            $fromExt = new \ZipArchive();
+            $fromExt->open($filename);
 
-        $this->assertSame($fromExt->getArchiveComment(), $fromPkg->getArchiveComment());
+            $fromPkg = new ZipArchive();
+            $fromPkg->open($filename);
+
+            $this->assertSame($fromExt->comment, $fromPkg->comment);
+            $this->assertSame($fromExt->getArchiveComment(), $fromPkg->getArchiveComment());
+            $this->assertSame($fromExt->getArchiveComment(\ZipArchive::FL_UNCHANGED), $fromPkg->getArchiveComment(\ZipArchive::FL_UNCHANGED));
+
+            $fromExt->comment = $myComment;
+            $fromPkg->comment = $myComment;
+
+            $this->assertSame($fromExt->comment, $fromPkg->comment);
+            $this->assertSame($fromExt->getArchiveComment(), $fromPkg->getArchiveComment());
+            $this->assertSame($fromExt->getArchiveComment(\ZipArchive::FL_UNCHANGED), $fromPkg->getArchiveComment(\ZipArchive::FL_UNCHANGED));
+            $this->assertSame($fromExt->status, $fromPkg->status);
+            $this->assertSame($fromExt->statusSys, $fromPkg->statusSys);
+        }
     }
 
 
