@@ -9,7 +9,7 @@ class SubStreamTest extends TestCase
 {
     private $string;
     private $memoryStream;
-    private $filename = __DIR__ . '/ipsum.txt';
+    private $filename = __DIR__ . '/../ipsum.txt';
 
 
     public function setUp()

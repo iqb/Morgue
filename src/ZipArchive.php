@@ -134,6 +134,11 @@ class ZipArchive implements \Countable
     const CM_IMPLODE = 6;
 
     /**
+     * Tokenizing compression algorithm (reserved only, most probably nowhere implemented)
+     */
+    const CM_TOKENIZE = 7;
+
+    /**
      * deflated
      */
     const CM_DEFLATE = 8;
@@ -429,6 +434,15 @@ class ZipArchive implements \Countable
 
     const OPSYS_DEFAULT = self::OPSYS_UNIX;
 
+    /**
+     * @var bool
+     */
+    private $bzip2Support = false;
+
+    /**
+     * @var bool
+     */
+    private $deflateSupport = false;
 
     /**
      * Status of the Zip Archive
@@ -479,6 +493,43 @@ class ZipArchive implements \Countable
         if (!\in_array(SubStream::SCHEME, \stream_get_wrappers())) {
             \stream_wrapper_register(SubStream::SCHEME, SubStream::class);
         }
+
+        $this->deflateSupport(true);
+        $this->bzip2Support(true);
+    }
+
+
+    /**
+     * Enable or disable deflate compression support.
+     * Can be called without parameter to check status.
+     *
+     * @param bool $enableSupport Enable or disable deflate compression support
+     * @return bool The deflate compression support status valid from now on
+     */
+    public function deflateSupport(bool $enableSupport = null)
+    {
+        if ($enableSupport !== null) {
+            $this->deflateSupport = ($enableSupport && \in_array('zlib.*', \stream_get_filters()));
+        }
+
+        return $this->deflateSupport;
+    }
+
+
+    /**
+     * Enable or disable BZip2 compression support.
+     * Can be called without parameter to check status.
+     *
+     * @param bool $enableSupport Enable or disable BZip2 compression support
+     * @return bool The BZip2 support status valid from now on
+     */
+    public function bzip2Support(bool $enableSupport = null)
+    {
+        if ($enableSupport !== null) {
+            $this->bzip2Support = ($enableSupport && \in_array('bzip2.*', \stream_get_filters()));
+        }
+
+        return $this->bzip2Support;
     }
 
 
@@ -769,6 +820,9 @@ class ZipArchive implements \Countable
             case self::ER_NOENT:
                 return "No such file";
 
+            case self::ER_COMPNOTSUPP:
+                return "Compression method not supported";
+
             case self::ER_INVAL:
                 return "Invalid argument";
 
@@ -804,6 +858,8 @@ class ZipArchive implements \Countable
         $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_COMPRESSED|self::FL_UNCHANGED));
         $directory = ($validFlags & self::FL_UNCHANGED ? $this->originalCentralDirectory : $this->modifiedCentralDirectory);
 
+        $this->status = self::ER_OK;
+
         if (!isset($directory[$index])) {
             return false;
         }
@@ -830,17 +886,18 @@ class ZipArchive implements \Countable
             return $handle;
         }
 
-        elseif ($entry->getCompressionMethod() === self::CM_DEFLATE) {
+        elseif ($this->deflateSupport && ($entry->getCompressionMethod() === self::CM_DEFLATE)) {
             \stream_filter_append($handle, 'zlib.inflate', \STREAM_FILTER_READ);
             return $handle;
         }
 
-        elseif ($entry->getCompressionMethod() === self::CM_BZIP2) {
+        elseif ($this->bzip2Support && ($entry->getCompressionMethod() === self::CM_BZIP2)) {
             \stream_filter_append($handle, 'bzip2.decompress', \STREAM_FILTER_READ);
             return $handle;
         }
 
         else {
+            $this->status = self::ER_COMPNOTSUPP;
             return false;
         }
     }

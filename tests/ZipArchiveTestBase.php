@@ -41,9 +41,39 @@ abstract class ZipArchiveTestBase extends TestCase
     const ZIP_DEFLATE = __DIR__ . '/archives/method-deflate.zip';
 
     /**
+     * A test file containing a file with deflate compression method
+     */
+    const ZIP_DEFLATE64 = __DIR__ . '/archives/method-deflate64.zip';
+
+    /**
      * A test file containing a file with BZip2 compression method
      */
     const ZIP_BZIP2 = __DIR__ . '/archives/method-bzip2.zip';
+
+    /**
+     * A test file containing a file with PPMd compression method
+     */
+    const ZIP_PPMD = __DIR__ . '/archives/method-ppmd.zip';
+
+    /**
+     * A lorem ipsum file used e.g. in the method testing zip files
+     */
+    const REFERENCE_FILE = __DIR__ . '/ipsum.txt';
+
+    protected static $libzipFeatures = [
+        ZipArchive::CM_TOKENIZE => false,
+        ZipArchive::CM_DEFLATE   => false,
+        ZipArchive::CM_DEFLATE64 => false,
+        ZipArchive::CM_PKWARE_IMPLODE => false,
+        ZipArchive::CM_BZIP2 => false,
+        ZipArchive::CM_LZMA => false,
+        ZipArchive::CM_TERSE => false,
+        ZipArchive::CM_LZ77 => false,
+        ZipArchive::CM_WAVPACK => false,
+        ZipArchive::CM_PPMD => false,
+        'encryption' => false,
+        'initialized' => false,
+    ];
 
     public function setUp()
     {
@@ -54,6 +84,23 @@ abstract class ZipArchiveTestBase extends TestCase
         // Set both to UTC to avoid test problems system timezone settings
         \date_default_timezone_set('UTC');
         \putenv("TZ=UTC");
+
+        if (!self::$libzipFeatures['initialized']) {
+            $fileName = \tempnam(\sys_get_temp_dir(), 'ziparchive_feature_probe');
+            $zip = new \ZipArchive();
+            $zip->open($fileName, \ZipArchive::CREATE);
+            $zip->addFromString("test", "contents");
+
+            foreach (self::$libzipFeatures as $feature => $status) {
+                if ($feature === 'initialized') {
+                    self::$libzipFeatures[$feature] = true;
+                } elseif ($feature === 'encryption') {
+                    self::$libzipFeatures[$feature] = (defined(\ZipArchive::class.'::EM_AES_256') && ($zip->setEncryptionIndex(0, \ZipArchive::EM_AES_256, "password") !== false));
+                } else {
+                    self::$libzipFeatures[$feature] = ($zip->setCompressionIndex(0, $feature) !== false);
+                }
+            }
+        }
     }
 
     /**

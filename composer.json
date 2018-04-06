@@ -26,8 +26,12 @@
         "php": ">=7.0",
         "ext-zlib": "*"
     },
+    "suggests": {
+        "ext-bz2": "Adds support for the BZip2 compression method"
+    },
     "require-dev": {
         "ext-zip": "*",
+        "ext-bz2": "*",
         "phpunit/phpunit": "^6.4"
     }
 }
