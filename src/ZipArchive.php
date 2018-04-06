@@ -706,6 +706,20 @@ class ZipArchive implements \Countable
 
 
     /**
+     * Get a file handler to the entry defined by its name (read only)
+     *
+     * @param string $name The name of the entry to use.
+     * @return resource|false
+     *
+     * @link http://php.net/manual/en/ziparchive.getstream.php
+     */
+    final public function getStream(string $name)
+    {
+        return $this->getStreamName($name);
+    }
+
+
+    /**
      * Get a file handle to the entry defined by its index (read only)
      *
      * @param int $index Index of the entry
@@ -756,6 +770,25 @@ class ZipArchive implements \Countable
         else {
             return false;
         }
+    }
+
+
+    /**
+     * Get a file handler to the entry defined by its name (read only)
+     *
+     * @param string $name The name of the entry to use.
+     * @param int|null $flags Any combination of ZipArchive::FL_COMPRESSED|ZipArchive::FL_NOCASE|ZipArchive::FL_NODIR|ZipArchive::FL_UNCHANGED
+     * @return resource|false
+     */
+    public function getStreamName(string $name, int $flags = null)
+    {
+        $validFlags = (is_null($flags) ? 0 : $flags & (self::FL_COMPRESSED|self::FL_NOCASE|self::FL_NODIR|self::FL_UNCHANGED));
+
+        if (($index = $this->locateName($name, $validFlags)) === false) {
+            return false;
+        }
+
+        return $this->getStreamIndex($index, $validFlags);
     }
 
 

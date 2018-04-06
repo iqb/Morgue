@@ -239,6 +239,15 @@ class ZipArchiveTest extends TestCase
 
 
     /**
+     * @dataProvider noExtrasZipFileProvider
+     */
+    public function testGetStream(string $fileName, int $index, string $name)
+    {
+        $this->compareMethodResults($fileName, 'getStream', [[$fileName]], 'assertSame');
+    }
+
+
+    /**
      * Tests statName() on unmodified zip file.
      * @dataProvider noExtrasZipFileProvider
      */
