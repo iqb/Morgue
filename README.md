@@ -12,5 +12,6 @@ The main limitation in using libzip is the inability of ZipArchive to work with 
  e.g. open a ZIP file directly from a HTTP URL. 
 
 ### References
-- [ZIP specification v 6.3.3](https://www.loc.gov/preservation/digital/formats/digformatspecs/APPNOTE(20120901)_Version_6.3.3.txt)
-- [Additional extra field definitions](https://github.com/nih-at/libzip/blob/master/docs/extrafld.txt)
+- [PKZip .ZIP Application Note Overview page](https://support.pkware.com/display/PKZIP/APPNOTE)
+- ZIP specification [v6.3.3](https://www.pkware.com/documents/APPNOTE/APPNOTE-6.3.3.TXT) ([mirror](https://www.loc.gov/preservation/digital/formats/digformatspecs/APPNOTE(20120901)_Version_6.3.3.txt)), [v6.3.4](https://www.pkware.com/documents/APPNOTE/APPNOTE-6.3.4.TXT) 
+- [libZIP additional extra field definitions](https://github.com/nih-at/libzip/blob/master/docs/extrafld.txt)
