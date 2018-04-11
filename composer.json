@@ -13,6 +13,7 @@
             "iqb\\": "src/"
         },
         "files": [
+            "src/constants.php",
             "src/zip/constants.php",
             "src/zip/functions.php"
         ]
