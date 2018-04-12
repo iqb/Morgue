@@ -58,6 +58,25 @@ final class Archive
     }
 
     /**
+     * @param $idOrName
+     * @return ArchiveEntry|null
+     */
+    public function getEntry($idOrName)
+    {
+        if (\is_int($idOrName)) {
+            return (isset($this->entries[$idOrName]) ? $this->entries[$idOrName] : null);
+        }
+
+        elseif (\is_string($idOrName)) {
+            return (isset($this->entriesByName[$idOrName]) ? $this->entries[$this->entriesByName[$idOrName]] : null);
+        }
+
+        else {
+            throw new \InvalidArgumentException("Can only search by entry id or name.");
+        }
+    }
+
+    /**
      * Add an entry to the archive.
      *
      * @param ArchiveEntry $entry
