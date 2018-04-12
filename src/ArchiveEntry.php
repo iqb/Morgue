@@ -240,6 +240,45 @@ final class ArchiveEntry
     }
 
     /**
+     * @param string $path
+     * @return ArchiveEntry
+     */
+    public function withSourcePath(string $path) : self
+    {
+        $obj = clone $this;
+        $obj->sourcePath = $path;
+        $obj->sourceStream = null;
+        $obj->sourceString = null;
+        return $obj;
+    }
+
+    /**
+     * @param resource $stream
+     * @return ArchiveEntry
+     */
+    public function withSourceStream($stream) : self
+    {
+        $obj = clone $this;
+        $obj->sourcePath = null;
+        $obj->sourceStream = $stream;
+        $obj->sourceString = null;
+        return $obj;
+    }
+
+    /**
+     * @param string $content
+     * @return ArchiveEntry
+     */
+    public function withSourceString(string $content) : self
+    {
+        $obj = clone $this;
+        $obj->sourcePath = null;
+        $obj->sourceStream = null;
+        $obj->sourceString = $content;
+        return $obj;
+    }
+
+    /**
      * @return string|null
      */
     public function getName()
