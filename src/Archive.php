@@ -42,7 +42,7 @@ final class Archive
      * @param string $comment
      * @return Archive
      */
-    public function setComment(string $comment = null): Archive
+    public function withComment(string $comment = null): Archive
     {
         $obj = clone $this;
         $obj->comment = $comment;

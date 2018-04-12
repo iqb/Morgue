@@ -251,7 +251,7 @@ final class ArchiveEntry
      * @param string $name
      * @return ArchiveEntry
      */
-    public function setName(string $name): ArchiveEntry
+    public function withName(string $name) : self
     {
         $obj = clone $this;
         $obj->name = $name;
@@ -270,7 +270,7 @@ final class ArchiveEntry
      * @param int $uncompressedSize
      * @return ArchiveEntry
      */
-    public function setUncompressedSize(int $uncompressedSize): ArchiveEntry
+    public function withUncompressedSize(int $uncompressedSize) : self
     {
         $obj = clone $this;
         $obj->uncompressedSize = $uncompressedSize;
@@ -289,7 +289,7 @@ final class ArchiveEntry
      * @param int $sourceSize
      * @return ArchiveEntry
      */
-    public function setSourceSize(int $sourceSize): ArchiveEntry
+    public function withSourceSize(int $sourceSize) : self
     {
         $obj = clone $this;
         $obj->sourceSize = $sourceSize;
@@ -308,7 +308,7 @@ final class ArchiveEntry
      * @param int $targetSize
      * @return ArchiveEntry
      */
-    public function setTargetSize(int $targetSize): ArchiveEntry
+    public function withTargetSize(int $targetSize) : self
     {
         $obj = clone $this;
         $obj->targetSize = $targetSize;
@@ -327,7 +327,7 @@ final class ArchiveEntry
      * @param \DateTimeInterface $creationTime
      * @return ArchiveEntry
      */
-    public function setCreationTime(\DateTimeInterface $creationTime): ArchiveEntry
+    public function withCreationTime(\DateTimeInterface $creationTime) : self
     {
         $obj = clone $this;
         $obj->creationTime = $creationTime;
@@ -346,7 +346,7 @@ final class ArchiveEntry
      * @param \DateTimeInterface $modificationTime
      * @return ArchiveEntry
      */
-    public function setModificationTime(\DateTimeInterface $modificationTime): ArchiveEntry
+    public function withModificationTime(\DateTimeInterface $modificationTime) : self
     {
         $obj = clone $this;
         $obj->modificationTime = $modificationTime;
@@ -365,7 +365,7 @@ final class ArchiveEntry
      * @param int $checksumCrc32
      * @return ArchiveEntry
      */
-    public function setChecksumCrc32(int $checksumCrc32): ArchiveEntry
+    public function withChecksumCrc32(int $checksumCrc32) : self
     {
         $obj = clone $this;
         $obj->checksumCrc32 = $checksumCrc32;
@@ -381,10 +381,10 @@ final class ArchiveEntry
     }
 
     /**
-     * @param string $comment
+     * @param string|null $comment
      * @return ArchiveEntry
      */
-    public function setComment(string $comment): ArchiveEntry
+    public function withComment(string $comment = null) : self
     {
         $obj = clone $this;
         $obj->comment = $comment;
@@ -392,7 +392,7 @@ final class ArchiveEntry
     }
 
     /**
-     * @return string||null
+     * @return string|null
      */
     public function getSourceCompressionMethod()
     {
@@ -400,10 +400,12 @@ final class ArchiveEntry
     }
 
     /**
-     * @param COMPRESSION_METHOD_ $sourceCompressionMethod
+     * Any of the COMPRESSION_METHOD_* constants
+     *
+     * @param string $sourceCompressionMethod
      * @return ArchiveEntry
      */
-    public function setSourceCompressionMethod($sourceCompressionMethod): ArchiveEntry
+    public function withSourceCompressionMethod($sourceCompressionMethod) : self
     {
         $obj = clone $this;
         $obj->sourceCompressionMethod = $sourceCompressionMethod;
@@ -422,7 +424,7 @@ final class ArchiveEntry
      * @param string $targetCompressionMethod
      * @return ArchiveEntry
      */
-    public function setTargetCompressionMethod($targetCompressionMethod): ArchiveEntry
+    public function withTargetCompressionMethod($targetCompressionMethod) : self
     {
         $obj = clone $this;
         $obj->targetCompressionMethod = $targetCompressionMethod;
@@ -441,7 +443,7 @@ final class ArchiveEntry
      * @param int $dosAttributes
      * @return ArchiveEntry
      */
-    public function setDosAttributes(int $dosAttributes): ArchiveEntry
+    public function withDosAttributes(int $dosAttributes) : self
     {
         $obj = clone $this;
         $obj->dosAttributes = $dosAttributes;
@@ -460,7 +462,7 @@ final class ArchiveEntry
      * @param int $unixAttributes
      * @return ArchiveEntry
      */
-    public function setUnixAttributes(int $unixAttributes): ArchiveEntry
+    public function withUnixAttributes(int $unixAttributes) : self
     {
         $obj = clone $this;
         $obj->unixAttributes = $unixAttributes;
