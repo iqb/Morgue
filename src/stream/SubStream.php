@@ -64,30 +64,59 @@ final class SubStream
         if (!isset($parts['host']) || !\is_numeric($parts['host'])) {
             $errors && \trigger_error("Invalid start offset.", \E_USER_ERROR);
             return false;
+        } else {
+            $offset = \intval($parts['host']);
         }
 
         if (!isset($parts['port']) || !\is_numeric($parts['port'])) {
             $errors && \trigger_error("Invalid length.", \E_USER_ERROR);
             return false;
+        } else {
+            $length = \intval($parts['port']);
         }
 
         if (!isset($parts['path']) || !\is_numeric(\substr($parts['path'], 1))) {
             $errors && \trigger_error("Invalid resource to wrap.", \E_USER_ERROR);
             return false;
+        } else {
+            $resourceId = \intval(\substr($parts['path'], 1));
         }
 
-        $this->enforceOffsetMin = \intval($parts['host']);
-        $this->enforceOffsetMax = $this->enforceOffsetMin + \intval($parts['port']);
-        $this->offset = $this->enforceOffsetMin;
-        $resource = \intval(\substr($parts['path'], 1));
-        $resources = \get_resources();
+        if (\function_exists('\get_resources')) {
+            $resources = \get_resources('stream');
+            if (isset($resources[$resourceId])) {
+                $originalResource = $resources[$resourceId];
+                $meta = \stream_get_meta_data($originalResource);
 
-        if (!isset($resources[$resource])) {
+                if (!isset($meta['seekable']) || !$meta['seekable']) {
+                    $errors && \trigger_error("Can only wrap seekable resources.", \E_USER_ERROR);
+                    return false;
+                }
+
+                if ($meta['wrapper_type'] === 'PHP' && $meta['stream_type'] === 'MEMORY') {
+                    $oldStreamPosition = \ftell($originalResource);
+                    $resource = \fopen($meta['uri'], 'w+b');
+                    \fseek($originalResource, $this->enforceOffsetMin);
+                    \stream_copy_to_stream($originalResource, $resource, $length, $offset);
+                    $this->enforceOffsetMin = $this->offset = 0;
+                    $this->enforceOffsetMax = $length;
+                    \fseek($originalResource, $oldStreamPosition);
+                }
+
+                else {
+                    $this->enforceOffsetMin = $this->offset = $offset;
+                    $this->enforceOffsetMax = $offset + $length;
+                    $resource = \fopen($meta['uri'], 'r');
+                }
+            }
+        }
+
+        if (!isset($resource)) {
             $errors && \trigger_error("Resource not available.", \E_USER_ERROR);
             return false;
         }
 
-        $this->handle = $resources[$resource];
+        $this->handle = $resource;
         return true;
     }
 
