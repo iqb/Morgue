@@ -219,6 +219,27 @@ final class ArchiveEntry
     }
 
     /**
+     * @return resource
+     */
+    public function getSourceStream()
+    {
+        if ($this->sourceStream !== null) {
+            return $this->sourceStream;
+        }
+
+        elseif ($this->sourcePath !== null) {
+            return \fopen($this->sourcePath, 'r');
+        }
+
+        else {
+            $fp = \fopen('php://memory', 'r+');
+            \fwrite($fp, $this->sourceString);
+            \fseek($fp, 0);
+            return $fp;
+        }
+    }
+
+    /**
      * @return string|null
      */
     public function getName()
