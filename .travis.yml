@@ -1,7 +1,6 @@
 language: php
 
 php:
-  - nightly
   - 7.2
   - 7.1
   - 7.0
@@ -13,6 +12,7 @@ php:
   - 7.0.28 # Ubuntu 16.04 LTS (Xenial)
   - 7.0.27 # Debian Stretch
   - 7.0.12 # openSUSE Tumbleweed
+  - nightly
 
 install:
   - composer install
@@ -22,4 +22,4 @@ script:
 
 after_script:
   - wget https://scrutinizer-ci.com/ocular.phar
-  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+  - if [ -s "coverage.clover" ]; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover; fi
