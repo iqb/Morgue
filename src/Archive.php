@@ -26,7 +26,7 @@ final class Archive
     private $entries = [];
 
     /**
-     * @var ArchiveEntry[]
+     * @var int[]
      */
     private $entriesByName = [];
 
@@ -80,6 +80,7 @@ final class Archive
      * Add an entry to the archive.
      *
      * @param ArchiveEntry $entry
+     * @param int|null $index
      * @return Archive
      */
     public function addEntry(ArchiveEntry $entry, int $index = null): Archive
@@ -89,11 +90,11 @@ final class Archive
         }
 
         if ($index !== null && isset($this->entries[$index])) {
-            throw new \RuntimeException("Can not replace existing index #$index in addEntry().");
+            throw new \InvalidArgumentException("Can not replace existing index #$index in addEntry().");
         }
 
         if (isset($this->entriesByName[$entry->getName()])) {
-            throw new \RuntimeException("Can not add entry with already existing name '" . $entry->getName() . "'.");
+            throw new \InvalidArgumentException("Can not add entry with already existing name '" . $entry->getName() . "'.");
         }
 
         $obj = clone $this;
@@ -139,7 +140,7 @@ final class Archive
             }
         }
 
-        elseif ($entryOrIdOrName instanceof self) {
+        elseif ($entryOrIdOrName instanceof ArchiveEntry) {
             if (($index = \array_search($entryOrIdOrName, $this->entries, true)) === false) {
                 throw new \InvalidArgumentException("The supplied entry is not found in this Archive.");
             }
