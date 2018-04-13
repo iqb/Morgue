@@ -1,6 +1,6 @@
 {
     "name": "morgue/morgue",
-    "description": "ZipArchive replacement supporting PHP streams.",
+    "description": "Morgue: modular PHP archive file reader and writer",
     "authors": [
         {
             "name": "Dennis Birkholz",

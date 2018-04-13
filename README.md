@@ -1,7 +1,7 @@
-# PHP ZipArchive drop-in replacement
+# Morgue: modular PHP archive file reader and writer
 
-[![Build Status](https://travis-ci.org/iqb/ZipArchive.png?branch=master)](https://travis-ci.org/iqb/ZipArchive)
-[![Code Coverage](https://scrutinizer-ci.com/g/iqb/ZipArchive/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/iqb/ZipArchive)
+[![Build Status](https://travis-ci.org/iqb/Morgue.png?branch=master)](https://travis-ci.org/iqb/Morgue)
+[![Code Coverage](https://scrutinizer-ci.com/g/iqb/Morgue/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/iqb/Morgue)
 [![Software License](https://img.shields.io/badge/License-LGPL%20V3-brightgreen.svg?style=flat-square)](LICENSE)
 
 This package aims to become a drop-in replacement for the ZipArchive class provided by the PHP zip extension.
