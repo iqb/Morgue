@@ -1,12 +1,12 @@
 <?php
 
-namespace iqb\zip\extraField;
+namespace morgue\zip\extraField;
 
-use iqb\zip\CentralDirectoryHeader;
-use iqb\zip\ExtraField;
-use iqb\zip\ExtraFieldInterface;
-use const iqb\zip\MAX_INT_16;
-use const iqb\zip\MAX_INT_32;
+use morgue\zip\CentralDirectoryHeader;
+use morgue\zip\ExtraField;
+use morgue\zip\ExtraFieldInterface;
+use const morgue\zip\MAX_INT_16;
+use const morgue\zip\MAX_INT_32;
 
 /**
  * see 4.5.3 - Zip64 Extended Information Extra Field

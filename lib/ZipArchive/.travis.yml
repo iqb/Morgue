@@ -1,0 +1,25 @@
+language: php
+
+php:
+  - nightly
+  - 7.2
+  - 7.1
+  - 7.0
+  - 7.2.4
+  - 7.2.3 # Ubuntu 18.04 (Bionic)
+  - 7.1.16
+  - 7.1.11 # Ubuntu 17.10 (Artful)
+  - 7.0.28
+  - 7.0.28 # Ubuntu 16.04 LTS (Xenial)
+  - 7.0.27 # Debian Stretch
+  - 7.0.12 # openSUSE Tumbleweed
+
+install:
+  - composer install
+
+script:
+  - php vendor/bin/phpunit --coverage-clover=coverage.clover
+
+after_script:
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover

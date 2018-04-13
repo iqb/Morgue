@@ -1,8 +1,8 @@
 <?php
 
-namespace iqb\zip;
+namespace morgue\zip;
 
-use iqb\zip\extraField\Zip64ExtendedInformation;
+use morgue\zip\extraField\Zip64ExtendedInformation;
 
 final class ExtraField implements ExtraFieldInterface
 {

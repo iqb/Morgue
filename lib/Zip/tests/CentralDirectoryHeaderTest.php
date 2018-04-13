@@ -1,6 +1,6 @@
 <?php
 
-namespace iqb\zip;
+namespace morgue\zip;
 
 use PHPUnit\Framework\TestCase;
 

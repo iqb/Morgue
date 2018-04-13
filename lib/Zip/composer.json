@@ -1,0 +1,32 @@
+{
+  "name": "morgue/zip",
+  "description": "Morgue: ZIP file format driver",
+  "authors": [
+    {
+      "name": "Dennis Birkholz",
+      "email": "dennis@birkholz.org"
+    }
+  ],
+  "license": "LGPL-3.0-or-later",
+  "autoload": {
+    "psr-4": {
+      "morgue\\zip\\": "src/"
+    },
+    "files": [
+      "src/constants.php",
+      "src/functions.php"
+    ]
+  },
+  "require": {
+    "php": ">=7.0",
+    "ext-zlib": "*",
+    "iqb/archive": "dev-master"
+  },
+  "suggests": {
+    "ext-bz2": "Adds support for BZip2 compressed ZIP files"
+  },
+  "require-dev": {
+    "ext-bz2": "*",
+    "phpunit/phpunit": "^6.4"
+  }
+}

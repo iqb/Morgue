@@ -1,11 +1,11 @@
 <?php
 
-namespace iqb\zip\extraField;
+namespace morgue\zip\extraField;
 
-use iqb\zip\CentralDirectoryHeader;
-use iqb\zip\ExtraField;
-use const iqb\zip\MAX_INT_16;
-use const iqb\zip\MAX_INT_32;
+use morgue\zip\CentralDirectoryHeader;
+use morgue\zip\ExtraField;
+use const morgue\zip\MAX_INT_16;
+use const morgue\zip\MAX_INT_32;
 use PHPUnit\Framework\TestCase;
 
 final class Zip64ExtendedInformationTest extends TestCase

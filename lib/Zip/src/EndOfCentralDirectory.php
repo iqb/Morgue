@@ -1,6 +1,6 @@
 <?php
 
-namespace iqb\zip;
+namespace morgue\zip;
 
 final class EndOfCentralDirectory
 {

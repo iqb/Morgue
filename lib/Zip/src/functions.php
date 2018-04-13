@@ -1,6 +1,6 @@
 <?php
 
-namespace iqb\zip;
+namespace morgue\zip;
 
 /**
  * Convert dos date and time values to a \DateTimeInterface object.

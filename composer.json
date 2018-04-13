@@ -11,14 +11,15 @@
     "autoload": {
         "psr-4": {
             "morgue\\archive\\": "lib/Archive/src/",
+            "morgue\\zip\\": "lib/Zip/src/",
             "iqb\\stream\\": "lib/SubStream/src/",
             "iqb\\": "src/"
         },
         "files": [
             "lib/Archive/src/constants.php",
             "lib/SubStream/src/register.php",
-            "src/zip/constants.php",
-            "src/zip/functions.php"
+            "lib/Zip/src/constants.php",
+            "lib/Zip/src/functions.php"
         ]
     },
     "autoload-dev": {
@@ -31,7 +32,7 @@
         "ext-zlib": "*"
     },
     "suggests": {
-        "ext-bz2": "Adds support for the BZip2 compression method"
+        "ext-bz2": "Adds support for BZip2 compressed ZIP files"
     },
     "require-dev": {
         "ext-zip": "*",

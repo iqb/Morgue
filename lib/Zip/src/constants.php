@@ -1,6 +1,6 @@
 <?php
 
-namespace iqb\zip;
+namespace morgue\zip;
 
 use const morgue\archive\COMPRESSION_METHOD_BZIP2;
 use const morgue\archive\COMPRESSION_METHOD_DEFLATE;
@@ -98,20 +98,108 @@ const DOS_ATTRIBUTE_MAPPING = [
 ];
 
 /**
+ * stored (uncompressed)
+ */
+const ZIP_COMPRESSION_METHOD_STORE = 0;
+
+/**
+ * shrunk
+ */
+const ZIP_COMPRESSION_METHOD_SHRINK = 1;
+
+/**
+ * reduced with factor 1
+ */
+const ZIP_COMPRESSION_METHOD_REDUCE_1 = 2;
+
+/**
+ * reduced with factor 2
+ */
+const ZIP_COMPRESSION_METHOD_REDUCE_2 = 3;
+
+/**
+ * reduced with factor 3
+ */
+const ZIP_COMPRESSION_METHOD_REDUCE_3 = 4;
+
+/**
+ * reduced with factor 4
+ */
+const ZIP_COMPRESSION_METHOD_REDUCE_4 = 5;
+
+/**
+ * imploded
+ */
+const ZIP_COMPRESSION_METHOD_IMPLODE = 6;
+
+/**
+ * Tokenizing compression algorithm (reserved only, most probably nowhere implemented)
+ */
+const ZIP_COMPRESSION_METHOD_TOKENIZE = 7;
+
+/**
+ * deflated
+ */
+const ZIP_COMPRESSION_METHOD_DEFLATE = 8;
+
+/**
+ * deflate64
+ */
+const ZIP_COMPRESSION_METHOD_DEFLATE64 = 9;
+
+/**
+ * PKWARE Data Compression Library Imploding (old IBM TERSE)
+ */
+const ZIP_COMPRESSION_METHOD_PKWARE_IMPLODE = 10;
+
+/**
+ * BZip2 algorithm
+ */
+const ZIP_COMPRESSION_METHOD_BZIP2 = 12;
+
+/**
+ * LZMA (EFS)
+ */
+const ZIP_COMPRESSION_METHOD_LZMA = 14;
+
+/**
+ * File is compressed using IBM TERSE
+ */
+const ZIP_COMPRESSION_METHOD_TERSE = 18;
+
+/**
+ * IBM LZ77 z Architecture (PFS)
+ */
+const ZIP_COMPRESSION_METHOD_LZ77 = 19;
+
+/**
+ * WavPack compressed data
+ * @link http://www.wavpack.com
+ */
+const ZIP_COMPRESSION_METHOD_WAVPACK = 97;
+
+/**
+ * PPMd version I, Rev 1
+ * @link http://www.compression.ru/ds/
+ */
+const ZIP_COMPRESSION_METHOD_PPMD = 98;
+
+
+/**
  * Mapping of zip compression methods to generic compression methods
  */
 const COMPRESSION_METHOD_MAPPING = [
-    ZipArchive::CM_STORE     => COMPRESSION_METHOD_STORE,
-    ZipArchive::CM_DEFLATE   => COMPRESSION_METHOD_DEFLATE,
-    ZipArchive::CM_DEFLATE64 => COMPRESSION_METHOD_DEFLATE64,
-    ZipArchive::CM_BZIP2     => COMPRESSION_METHOD_BZIP2,
-    ZipArchive::CM_LZMA      => COMPRESSION_METHOD_LZMA,
+    ZIP_COMPRESSION_METHOD_STORE     => COMPRESSION_METHOD_STORE,
+    ZIP_COMPRESSION_METHOD_DEFLATE   => COMPRESSION_METHOD_DEFLATE,
+    ZIP_COMPRESSION_METHOD_DEFLATE64 => COMPRESSION_METHOD_DEFLATE64,
+    ZIP_COMPRESSION_METHOD_BZIP2     => COMPRESSION_METHOD_BZIP2,
+    ZIP_COMPRESSION_METHOD_LZMA      => COMPRESSION_METHOD_LZMA,
 ];
 
 const COMPRESSION_METHOD_REVERSE_MAPPING = [
-    COMPRESSION_METHOD_STORE     => ZipArchive::CM_STORE,
-    COMPRESSION_METHOD_DEFLATE   => ZipArchive::CM_DEFLATE,
-    COMPRESSION_METHOD_DEFLATE64 => ZipArchive::CM_DEFLATE64,
-    COMPRESSION_METHOD_BZIP2     => ZipArchive::CM_BZIP2,
-    COMPRESSION_METHOD_LZMA      => ZipArchive::CM_LZMA,
+    COMPRESSION_METHOD_STORE     => ZIP_COMPRESSION_METHOD_STORE,
+    COMPRESSION_METHOD_DEFLATE   => ZIP_COMPRESSION_METHOD_DEFLATE,
+    COMPRESSION_METHOD_DEFLATE64 => ZIP_COMPRESSION_METHOD_DEFLATE64,
+    COMPRESSION_METHOD_BZIP2     => ZIP_COMPRESSION_METHOD_BZIP2,
+    COMPRESSION_METHOD_LZMA      => ZIP_COMPRESSION_METHOD_LZMA,
 ];

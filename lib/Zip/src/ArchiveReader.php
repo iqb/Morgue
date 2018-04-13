@@ -8,7 +8,7 @@
  * Committer: $Format:%cn <%ce>, %ci$
  */
 
-namespace iqb\zip;
+namespace morgue\zip;
 
 use morgue\archive\Archive;
 use morgue\archive\ArchiveReaderInterface;

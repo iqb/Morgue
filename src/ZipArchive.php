@@ -3,9 +3,26 @@
 namespace iqb;
 
 use const iqb\stream\SUBSTREAM_SCHEME;
-use iqb\zip\CentralDirectoryHeader;
-use iqb\zip\EndOfCentralDirectory;
-use iqb\zip\LocalFileHeader;
+use morgue\zip\CentralDirectoryHeader;
+use morgue\zip\EndOfCentralDirectory;
+use morgue\zip\LocalFileHeader;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_BZIP2;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_DEFLATE;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_DEFLATE64;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_IMPLODE;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_LZ77;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_LZMA;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_PKWARE_IMPLODE;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_PPMD;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_REDUCE_1;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_REDUCE_2;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_REDUCE_3;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_REDUCE_4;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_SHRINK;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_STORE;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_TERSE;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_TOKENIZE;
+use const morgue\zip\ZIP_COMPRESSION_METHOD_WAVPACK;
 
 /**
  *
@@ -98,92 +115,23 @@ class ZipArchive implements \Countable
      */
     const CM_DEFAULT = -1;
 
-    /**
-     * stored (uncompressed)
-     */
-    const CM_STORE = 0;
-
-    /**
-     * shrunk
-     */
-    const CM_SHRINK = 1;
-
-    /**
-     * reduced with factor 1
-     */
-    const CM_REDUCE_1 = 2;
-
-    /**
-     * reduced with factor 2
-     */
-    const CM_REDUCE_2 = 3;
-
-    /**
-     * reduced with factor 3
-     */
-    const CM_REDUCE_3 = 4;
-
-    /**
-     * reduced with factor 4
-     */
-    const CM_REDUCE_4 = 5;
-
-    /**
-     * imploded
-     */
-    const CM_IMPLODE = 6;
-
-    /**
-     * Tokenizing compression algorithm (reserved only, most probably nowhere implemented)
-     */
-    const CM_TOKENIZE = 7;
-
-    /**
-     * deflated
-     */
-    const CM_DEFLATE = 8;
-
-    /**
-     * deflate64
-     */
-    const CM_DEFLATE64 = 9;
-
-    /**
-     * PKWARE Data Compression Library Imploding (old IBM TERSE)
-     */
-    const CM_PKWARE_IMPLODE = 10;
-
-    /**
-     * BZip2 algorithm
-     */
-    const CM_BZIP2 = 12;
-
-    /**
-     * LZMA (EFS)
-     */
-    const CM_LZMA = 14;
-
-    /**
-     * File is compressed using IBM TERSE
-     */
-    const CM_TERSE = 18;
-
-    /**
-     * IBM LZ77 z Architecture (PFS)
-     */
-    const CM_LZ77 = 19;
-
-    /**
-     * WavPack compressed data
-     * @link http://www.wavpack.com
-     */
-    const CM_WAVPACK = 97;
-
-    /**
-     * PPMd version I, Rev 1
-     * @link http://www.compression.ru/ds/
-     */
-    const CM_PPMD = 98;
+    const CM_STORE          = ZIP_COMPRESSION_METHOD_STORE;
+    const CM_SHRINK         = ZIP_COMPRESSION_METHOD_SHRINK;
+    const CM_REDUCE_1       = ZIP_COMPRESSION_METHOD_REDUCE_1;
+    const CM_REDUCE_2       = ZIP_COMPRESSION_METHOD_REDUCE_2;
+    const CM_REDUCE_3       = ZIP_COMPRESSION_METHOD_REDUCE_3;
+    const CM_REDUCE_4       = ZIP_COMPRESSION_METHOD_REDUCE_4;
+    const CM_IMPLODE        = ZIP_COMPRESSION_METHOD_IMPLODE;
+    const CM_TOKENIZE       = ZIP_COMPRESSION_METHOD_TOKENIZE;
+    const CM_DEFLATE        = ZIP_COMPRESSION_METHOD_DEFLATE;
+    const CM_DEFLATE64      = ZIP_COMPRESSION_METHOD_DEFLATE64;
+    const CM_PKWARE_IMPLODE = ZIP_COMPRESSION_METHOD_PKWARE_IMPLODE;
+    const CM_BZIP2          = ZIP_COMPRESSION_METHOD_BZIP2;
+    const CM_LZMA           = ZIP_COMPRESSION_METHOD_LZMA;
+    const CM_TERSE          = ZIP_COMPRESSION_METHOD_TERSE;
+    const CM_LZ77           = ZIP_COMPRESSION_METHOD_LZ77;
+    const CM_WAVPACK        = ZIP_COMPRESSION_METHOD_WAVPACK;
+    const CM_PPMD           = ZIP_COMPRESSION_METHOD_PPMD;
 
     // Error constants
 
