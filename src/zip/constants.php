@@ -2,6 +2,13 @@
 
 namespace iqb\zip;
 
+use const iqb\COMPRESSION_METHOD_BZIP2;
+use const iqb\COMPRESSION_METHOD_DEFLATE;
+use const iqb\COMPRESSION_METHOD_DEFLATE64;
+use const iqb\COMPRESSION_METHOD_LZMA;
+use const iqb\COMPRESSION_METHOD_STORE;
+use iqb\ZipArchive;
+
 const MAX_INT_16 = 0xFFFF;
 const MAX_INT_32 = 0xFFFFFFFF;
 
@@ -88,4 +95,23 @@ const DOS_ATTRIBUTE_MAPPING = [
     DOS_ATTRIBUTE_VOLUME => 'Volume Label',
     DOS_ATTRIBUTE_DIRECTORY => 'Directory',
     DOS_ATTRIBUTE_ARCHIVE => 'Archive',
+];
+
+/**
+ * Mapping of zip compression methods to generic compression methods
+ */
+const COMPRESSION_METHOD_MAPPING = [
+    ZipArchive::CM_STORE     => COMPRESSION_METHOD_STORE,
+    ZipArchive::CM_DEFLATE   => COMPRESSION_METHOD_DEFLATE,
+    ZipArchive::CM_DEFLATE64 => COMPRESSION_METHOD_DEFLATE64,
+    ZipArchive::CM_BZIP2     => COMPRESSION_METHOD_BZIP2,
+    ZipArchive::CM_LZMA      => COMPRESSION_METHOD_LZMA,
+];
+
+const COMPRESSION_METHOD_REVERSE_MAPPING = [
+    COMPRESSION_METHOD_STORE     => ZipArchive::CM_STORE,
+    COMPRESSION_METHOD_DEFLATE   => ZipArchive::CM_DEFLATE,
+    COMPRESSION_METHOD_DEFLATE64 => ZipArchive::CM_DEFLATE64,
+    COMPRESSION_METHOD_BZIP2     => ZipArchive::CM_BZIP2,
+    COMPRESSION_METHOD_LZMA      => ZipArchive::CM_LZMA,
 ];

@@ -2,6 +2,8 @@
 
 namespace iqb\zip;
 
+use iqb\ArchiveEntry;
+
 /**
  * This class represents a "central directory header" data structure as defined in the ZIP specification.
  * CentralDirectoryHeader objects are immutable so every setX() method will return a copy with modified fields,
@@ -359,6 +361,60 @@ final class CentralDirectoryHeader
             . $this->fileName
             . $this->extraField
             . $this->fileComment
+            ;
+    }
+
+    /**
+     * Initialize a new central directory header from the supplied archive entry object
+     *
+     * @param ArchiveEntry $archiveEntry
+     * @return CentralDirectoryHeader
+     */
+    public static function createFromArchiveEntry(ArchiveEntry $archiveEntry) : self
+    {
+        list($modificationTime, $modificationDate) = dateTime2Dos($archiveEntry->getModificationTime());
+
+        $obj = new self(
+            0,
+            0,
+            0,
+            COMPRESSION_METHOD_REVERSE_MAPPING[$archiveEntry->getTargetCompressionMethod()],
+            $modificationTime,
+            $modificationDate,
+            $archiveEntry->getChecksumCrc32(),
+            $archiveEntry->getTargetSize(),
+            $archiveEntry->getUncompressedSize(),
+            0,
+            0,
+            0,
+            0,
+            $archiveEntry->getName(),
+            null,
+            $archiveEntry->getComment()
+        );
+
+        return $obj;
+    }
+
+    /**
+     * Create an archive entry from the data of this central directory header
+     *
+     * @return ArchiveEntry
+     */
+    public function toArchiveEntry() : ArchiveEntry
+    {
+        return (new ArchiveEntry($this->fileName))
+            ->withCreationTime($this->lastModification)
+            ->withModificationTime($this->lastModification)
+            ->withSourceCompressionMethod(COMPRESSION_METHOD_MAPPING[$this->compressionMethod])
+            ->withSourceSize($this->compressedSize)
+            ->withTargetCompressionMethod(COMPRESSION_METHOD_MAPPING[$this->compressionMethod])
+            ->withTargetSize($this->compressedSize)
+            ->withChecksumCrc32($this->crc32)
+            ->withUncompressedSize($this->uncompressedSize)
+            ->withDosAttributes($this->dosExternalAttributes)
+            ->withUnixAttributes($this->unixExternalAttributes)
+            ->withComment($this->fileComment !== '' ? $this->fileComment : null)
             ;
     }
 

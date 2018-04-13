@@ -2,6 +2,8 @@
 
 namespace iqb\zip;
 
+use iqb\ArchiveEntry;
+
 final class LocalFileHeader
 {
     const SIGNATURE = 0x504b0304;
@@ -217,6 +219,30 @@ final class LocalFileHeader
         $this->requireAdditionalData = null;
 
         return $this->fileNameLength + $this->extraFieldLength;
+    }
+
+    /**
+     * Initialize a new local file header from the supplied archive entry object
+     *
+     * @param ArchiveEntry $archiveEntry
+     * @return LocalFileHeader
+     */
+    public static function createFromArchiveEntry(ArchiveEntry $archiveEntry) : self
+    {
+        list($modificationTime, $modificationDate) = dateTime2Dos($archiveEntry->getModificationTime());
+
+        return new self(
+            0,
+            0,
+            COMPRESSION_METHOD_REVERSE_MAPPING[$archiveEntry->getTargetCompressionMethod()],
+            $modificationTime,
+            $modificationDate,
+            $archiveEntry->getChecksumCrc32(),
+            $archiveEntry->getTargetSize(),
+            $archiveEntry->getUncompressedSize(),
+            $archiveEntry->getName(),
+            null
+        );
     }
 
     /**
