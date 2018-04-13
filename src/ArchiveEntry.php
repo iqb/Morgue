@@ -113,79 +113,6 @@ final class ArchiveEntry
     public function __construct(string $name)
     {
         $this->name = $name;
-        $this->creationTime = new \DateTimeImmutable('now', new \DateTimeZone(\date_default_timezone_get()));
-        $this->modificationTime = $this->creationTime;
-    }
-
-    /**
-     * Create a new archive entry from the supplied stream
-     *
-     * @param string $name
-     * @param $stream
-     * @return ArchiveEntry
-     */
-    public static function createFromStream(string $name, $stream, $compressionMethod = COMPRESSION_METHOD_STORE)
-    {
-        $obj = new self($name);
-        $obj->sourceStream = $stream;
-        $obj->sourceCompressionMethod = $compressionMethod;
-        if (($stat = @\fstat($obj->sourceStream)) !== false) {
-            $obj->importStat($stat);
-        }
-        return $obj;
-    }
-
-    /**
-     * Create a new archive entry $name with uncompressed data $data
-     *
-     * @param string $name
-     * @param string $data
-     * @return ArchiveEntry
-     */
-    public static function createFromString(string $name, string $data, $compressionMethod = COMPRESSION_METHOD_STORE) : self
-    {
-        $obj = new self($name);
-        $obj->sourceString = $data;
-        $obj->sourceCompressionMethod = $compressionMethod;
-        $obj->sourceSize = \strlen($obj->sourceString);
-        if ($obj->sourceCompressionMethod === COMPRESSION_METHOD_STORE) {
-            $obj->uncompressedSize = $obj->sourceSize;
-        }
-        $obj->unixAttributes = self::UNIX_ATTRIBUTES_DEFAULT_FILE;
-        return $obj;
-    }
-
-    /**
-     * Creates a file or directory from the supplied path name
-     *
-     * @param string $name
-     * @param string $path
-     * @return ArchiveEntry
-     */
-    public static function createFromPath(string $name, string $path) : self
-    {
-        $obj = new self($name);
-        $obj->sourcePath = \realpath($path);
-        if (($stat = @\stat($obj->sourcePath)) !== false) {
-            $obj->importStat($stat);
-        }
-        return $obj;
-    }
-
-    /**
-     * Creates a new directory with the specified name
-     *
-     * @param string $name
-     * @return ArchiveEntry
-     */
-    public static function createDirectory(string $name) : self
-    {
-        $obj = new self($name);
-        $obj->sourceCompressionMethod = COMPRESSION_METHOD_STORE;
-        $obj->sourceSize = 0;
-        $obj->uncompressedSize = 0;
-        $obj->unixAttributes = self::UNIX_ATTRIBUTES_DEFAULT_DIRECTORY;
-        return $obj;
     }
 
     /**
@@ -194,23 +121,29 @@ final class ArchiveEntry
      */
     private function importStat(array $stat)
     {
-        if (!empty($stat['mode'])) {
+        if (!empty($stat['mode']) && $this->unixAttributes === null) {
             $this->unixAttributes = $stat['mode'];
         }
 
-        if (!empty($stat['ctime']) && $this->creationTime->getTimestamp() !== $stat['ctime']) {
-            $this->creationTime = new \DateTimeImmutable($stat['ctime'], \date_default_timezone_get());
+        $timezone = new \DateTimeZone(\date_default_timezone_get());
+
+        if (!empty($stat['ctime']) && $this->creationTime === null) {
+            $this->creationTime = (new \DateTimeImmutable('@' . $stat['ctime']))->setTimezone($timezone);
         }
 
-        if (!empty($stat['mtime']) && $this->modificationTime->getTimestamp() !== $stat['mtime']) {
-            $this->modificationTime = new \DateTimeImmutable($stat['mtime'], \date_default_timezone_get());
+        if (!empty($stat['mtime']) && $this->modificationTime === null) {
+            $this->modificationTime = (new \DateTimeImmutable('@' . $stat['mtime']))->setTimezone($timezone);
         }
 
         if ($this->unixAttributes & UNIX_ATTRIBUTE_TYPE_DIRECTORY) {
             $this->sourceSize = 0;
+            $this->targetSize = 0;
             $this->uncompressedSize = 0;
             $this->sourceCompressionMethod = COMPRESSION_METHOD_STORE;
-        } elseif (isset($stat['size'])) {
+            $this->targetCompressionMethod = COMPRESSION_METHOD_STORE;
+        }
+
+        elseif ($this->unixAttributes & UNIX_ATTRIBUTE_TYPE_FILE) {
             $this->sourceSize = $stat['size'];
             if ($this->sourceCompressionMethod === COMPRESSION_METHOD_STORE) {
                 $this->uncompressedSize = $this->sourceSize;
@@ -221,7 +154,7 @@ final class ArchiveEntry
     /**
      * @return resource
      */
-    public function getSourceStream()
+    public function getSourceAsStream()
     {
         if ($this->sourceStream !== null) {
             return $this->sourceStream;
@@ -240,41 +173,128 @@ final class ArchiveEntry
     }
 
     /**
+     * @return string|null
+     */
+    public function getSourcePath()
+    {
+        return $this->sourcePath;
+    }
+
+    /**
+     * Set the path of the file that will serve as source for this entry.
+     * The file must exist and be readable.
+     * You may provide a URL if a matching stream wrapper is registered with stat support.
+     * Otherwise, use withSourceStream() to add a stream directly.
+     *
      * @param string $path
+     * @param string|null $compressionMethod
      * @return ArchiveEntry
      */
-    public function withSourcePath(string $path) : self
+    public function withSourcePath(string $path, string $compressionMethod = null) : self
     {
+        if (!\file_exists($path) || !\is_readable($path)) {
+            throw new \InvalidArgumentException('Can not use non-existing or unreadable file as source.');
+        }
+
+        if ($this->sourcePath !== null || $this->sourceStream !== null || $this->sourceString !== null) {
+            throw new \InvalidArgumentException('Can not replace source, create a new entry instead.');
+        }
+
         $obj = clone $this;
         $obj->sourcePath = $path;
-        $obj->sourceStream = null;
-        $obj->sourceString = null;
+
+        if ($compressionMethod !== null) {
+            $obj->sourceCompressionMethod = $compressionMethod;
+        }
+
+        if ($compressionMethod === COMPRESSION_METHOD_STORE) {
+            $obj->uncompressedSize = $obj->sourceSize;
+        }
+
+        if (($stat = @\stat($path)) !== false) {
+            $obj->importStat($stat);
+        }
+
         return $obj;
+    }
+
+    /**
+     * @return resource|null
+     */
+    public function getSourceStream()
+    {
+        return $this->sourceStream;
     }
 
     /**
      * @param resource $stream
+     * @param string $compressionMethod
      * @return ArchiveEntry
      */
-    public function withSourceStream($stream) : self
+    public function withSourceStream($stream, string $compressionMethod = null) : self
     {
+        if ($this->sourcePath !== null || $this->sourceStream !== null || $this->sourceString !== null) {
+            throw new \InvalidArgumentException('Can not replace source, create a new entry instead.');
+        }
+
         $obj = clone $this;
         $obj->sourcePath = null;
         $obj->sourceStream = $stream;
         $obj->sourceString = null;
+
+        if ($compressionMethod !== null) {
+            $obj->sourceCompressionMethod = $compressionMethod;
+        }
+
+        if (($stat = @\fstat($stream)) !== false) {
+            $obj->importStat($stat);
+        }
+
         return $obj;
     }
 
     /**
+     * @return string|null
+     */
+    public function getSourceString()
+    {
+        return $this->sourceString;
+    }
+
+    /**
      * @param string $content
+     * @param string $compressionMethod
      * @return ArchiveEntry
      */
-    public function withSourceString(string $content) : self
+    public function withSourceString(string $content, string $compressionMethod = null) : self
     {
+        if ($this->sourcePath !== null || $this->sourceStream !== null || $this->sourceString !== null) {
+            throw new \InvalidArgumentException('Can not replace source, create a new entry instead.');
+        }
+
         $obj = clone $this;
         $obj->sourcePath = null;
         $obj->sourceStream = null;
         $obj->sourceString = $content;
+        $obj->sourceSize = \strlen($content);
+
+        if ($compressionMethod !== null) {
+            $obj->sourceCompressionMethod = $compressionMethod;
+        }
+
+        if ($compressionMethod === COMPRESSION_METHOD_STORE) {
+            $obj->uncompressedSize = $obj->sourceSize;
+        }
+
+        $now = new \DateTimeImmutable('now', new \DateTimeZone(\date_default_timezone_get()));
+        if ($obj->creationTime === null) {
+            $obj->creationTime = $now;
+        }
+
+        if ($obj->modificationTime === null) {
+            $obj->modificationTime = $now;
+        }
+
         return $obj;
     }
 
