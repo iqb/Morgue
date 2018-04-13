@@ -10,6 +10,8 @@
 
 namespace iqb\stream;
 
-if (!\in_array(SubStream::SCHEME, \stream_get_wrappers())) {
-    \stream_wrapper_register(SubStream::SCHEME, SubStream::class);
+const SUBSTREAM_SCHEME = 'iqb.substream';
+
+if (!\in_array(SUBSTREAM_SCHEME, \stream_get_wrappers())) {
+    \stream_wrapper_register(SUBSTREAM_SCHEME, SubStream::class);
 }

@@ -9,7 +9,7 @@ class SubStreamTest extends TestCase
 {
     private $string;
     private $memoryStream;
-    private $filename = __DIR__ . '/../ipsum.txt';
+    private $filename = __DIR__ . '/ipsum.txt';
 
 
     public function setUp()
@@ -18,10 +18,6 @@ class SubStreamTest extends TestCase
         $this->memoryStream = \fopen('php://memory', 'r+');
         if (\strlen($this->string) !== ($bytesWritten = \fwrite($this->memoryStream, $this->string))) {
             throw new \RuntimeException('Setup failed!: ' . $bytesWritten);
-        }
-
-        if (!\in_array(SubStream::SCHEME, \stream_get_wrappers())) {
-            \stream_wrapper_register(SubStream::SCHEME, SubStream::class);
         }
     }
 
@@ -47,7 +43,7 @@ class SubStreamTest extends TestCase
      */
     public function testSubStream(int $offset, int $length, int $iterationStart, int $iterationLimit, int $iterationStep, int $probeLength, int $seekMode = \SEEK_SET)
     {
-        $subStream = \fopen(SubStream::SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->memoryStream, 'r');
+        $subStream = \fopen(SUBSTREAM_SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->memoryStream, 'r');
         $this->assertTrue(\is_resource($subStream));
 
         $referenceName = \tempnam(\sys_get_temp_dir(), 'phpunit_substream_ref');
@@ -57,11 +53,9 @@ class SubStreamTest extends TestCase
         $referenceStream = \fopen($referenceName, 'r');
 
         for ($i=$iterationStart; $i<$iterationLimit; $i+=$iterationStep) {
-            $debugArgs = ['i' => $i];
-
             \fseek($referenceStream, $i, $seekMode);
             \fseek($subStream, $i, $seekMode);
-            $this->assertEquals($string = \fread($referenceStream, $probeLength), \fread($subStream, $probeLength), new ErrorMessage('fread', $debugArgs));
+            $this->assertEquals($string = \fread($referenceStream, $probeLength), \fread($subStream, $probeLength), "Iteration: $i");
         }
     }
 
@@ -71,7 +65,7 @@ class SubStreamTest extends TestCase
         $offset = 500;
         $length = 1000;
 
-        $subStream = \fopen(SubStream::SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->memoryStream, 'r');
+        $subStream = \fopen(SUBSTREAM_SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->memoryStream, 'r');
         $this->assertTrue(\is_resource($subStream));
 
         $referenceStream = \fopen('php://memory', 'r+');

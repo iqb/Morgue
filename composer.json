@@ -10,11 +10,12 @@
     "license": "LGPL-3.0-or-later",
     "autoload": {
         "psr-4": {
+            "iqb\\stream\\": "lib/SubStream/src/",
             "iqb\\": "src/"
         },
         "files": [
+            "lib/SubStream/src/register.php",
             "src/constants.php",
-            "src/stream/register.php",
             "src/zip/constants.php",
             "src/zip/functions.php"
         ]

@@ -2,7 +2,7 @@
 
 namespace iqb;
 
-use iqb\stream\SubStream;
+use const iqb\stream\SUBSTREAM_SCHEME;
 use iqb\zip\CentralDirectoryHeader;
 use iqb\zip\EndOfCentralDirectory;
 use iqb\zip\LocalFileHeader;
@@ -490,10 +490,6 @@ class ZipArchive implements \Countable
 
     public function __construct()
     {
-        if (!\in_array(SubStream::SCHEME, \stream_get_wrappers())) {
-            \stream_wrapper_register(SubStream::SCHEME, SubStream::class);
-        }
-
         $this->deflateSupport(true);
         $this->bzip2Support(true);
     }
@@ -878,7 +874,7 @@ class ZipArchive implements \Countable
         $offset = \ftell($this->handle);
         $length = $entry->getCompressedSize();
 
-        if (($handle = \fopen(SubStream::SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->handle, 'r')) === false) {
+        if (($handle = \fopen(SUBSTREAM_SCHEME . '://' . $offset . ':' . $length . '/' . (int)$this->handle, 'r')) === false) {
             return false;
         }
 

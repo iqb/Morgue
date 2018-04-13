@@ -12,7 +12,7 @@ namespace iqb\zip;
 
 use iqb\Archive;
 use iqb\ArchiveReaderInterface;
-use iqb\stream\SubStream;
+use const iqb\stream\SUBSTREAM_SCHEME;
 
 /**
  * @author Dennis Birkholz <dennis@birkholz.org>
@@ -58,7 +58,7 @@ final class ArchiveReader implements ArchiveReaderInterface
             $archiveEntry = $centralDirectoryEntry->toArchiveEntry();
             if (!$centralDirectoryEntry->isDirectory()) {
                 $archiveEntry = $archiveEntry->withSourceStream(
-                    \fopen(SubStream::SCHEME . '://' . \ftell($stream) . ':' . $centralDirectoryEntry->getCompressedSize() . '/' . (int)$stream, 'r')
+                    \fopen(SUBSTREAM_SCHEME . '://' . \ftell($stream) . ':' . $centralDirectoryEntry->getCompressedSize() . '/' . (int)$stream, 'r')
                 );
             }
 

@@ -11,8 +11,6 @@ namespace iqb\stream;
  */
 final class SubStream
 {
-    const SCHEME = 'iqb.substream';
-
     /**
      * @var resource
      */
@@ -56,7 +54,7 @@ final class SubStream
         $errors = ($options & \STREAM_REPORT_ERRORS);
         $parts = \parse_url($path);
 
-        if (!isset($parts['scheme']) || $parts['scheme'] !== self::SCHEME) {
+        if (!isset($parts['scheme']) || $parts['scheme'] !== SUBSTREAM_SCHEME) {
             $errors && \trigger_error("Invalid URL scheme.", \E_USER_ERROR);
             return false;
         }
