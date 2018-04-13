@@ -1,0 +1,25 @@
+{
+    "name": "morgue/archive",
+    "description": "Morgue: format agnostic archive file representation",
+    "authors": [
+        {
+            "name": "Dennis Birkholz",
+            "email": "dennis@birkholz.org"
+        }
+    ],
+    "license": "LGPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "morgue\\archive\\": "src/"
+        },
+        "files": [
+            "src/constants.php"
+        ]
+    },
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.4"
+    }
+}

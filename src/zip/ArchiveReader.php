@@ -10,8 +10,8 @@
 
 namespace iqb\zip;
 
-use iqb\Archive;
-use iqb\ArchiveReaderInterface;
+use morgue\archive\Archive;
+use morgue\archive\ArchiveReaderInterface;
 use const iqb\stream\SUBSTREAM_SCHEME;
 
 /**

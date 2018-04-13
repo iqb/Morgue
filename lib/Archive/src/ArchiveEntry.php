@@ -8,7 +8,7 @@
  * Committer: $Format:%cn <%ce>, %cI$
  */
 
-namespace iqb;
+namespace morgue\archive;
 
 /**
  * This class represents a single entry in an archive (file, directory)

@@ -8,12 +8,12 @@
  * Committer: $Format:%cn <%ce>, %ci$
  */
 
-namespace iqb;
+namespace morgue\archive;
 
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \iqb\ArchiveEntry
+ * @coversDefaultClass \morgue\archive\ArchiveEntry
  */
 final class ArchiveEntryTest extends TestCase
 {
@@ -118,9 +118,9 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::getSourcePath()
-     * @covers \iqb\ArchiveEntry::withSourcePath()
-     * @covers \iqb\ArchiveEntry::importStat()
+     * @covers ::getSourcePath()
+     * @covers ::withSourcePath()
+     * @covers ::importStat()
      */
     public function testSourcePath()
     {
@@ -143,9 +143,9 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::getSourcePath()
-     * @covers \iqb\ArchiveEntry::withSourcePath()
-     * @covers \iqb\ArchiveEntry::importStat()
+     * @covers ::getSourcePath()
+     * @covers ::withSourcePath()
+     * @covers ::importStat()
      */
     public function testSourcePathDirectory()
     {
@@ -170,9 +170,9 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::getSourceStream()
-     * @covers \iqb\ArchiveEntry::withSourceStream()
-     * @covers \iqb\ArchiveEntry::importStat()
+     * @covers ::getSourceStream()
+     * @covers ::withSourceStream()
+     * @covers ::importStat()
      */
     public function testSourceStream()
     {
@@ -196,8 +196,8 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::getSourceString()
-     * @covers \iqb\ArchiveEntry::withSourceString()
+     * @covers ::getSourceString()
+     * @covers ::withSourceString()
      */
     public function testSourceString()
     {
@@ -222,7 +222,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourcePath()
+     * @covers ::withSourcePath()
      * @expectedException \InvalidArgumentException
      */
     public function testSourcePathExceptionInvalidFile()
@@ -232,7 +232,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourcePath()
+     * @covers ::withSourcePath()
      * @expectedException \InvalidArgumentException
      */
     public function testSourcePathExceptionPathSet()
@@ -243,7 +243,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourcePath()
+     * @covers ::withSourcePath()
      * @expectedException \InvalidArgumentException
      */
     public function testSourcePathExceptionStreamSet()
@@ -254,7 +254,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourcePath()
+     * @covers ::withSourcePath()
      * @expectedException \InvalidArgumentException
      */
     public function testSourcePathExceptionStringSet()
@@ -265,7 +265,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourceStream()
+     * @covers ::withSourceStream()
      * @expectedException \InvalidArgumentException
      */
     public function testSourceStreamExceptionPathSet()
@@ -276,7 +276,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourceStream()
+     * @covers ::withSourceStream()
      * @expectedException \InvalidArgumentException
      */
     public function testSourceStreamExceptionStreamSet()
@@ -287,7 +287,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourceStream()
+     * @covers ::withSourceStream()
      * @expectedException \InvalidArgumentException
      */
     public function testSourceStreamExceptionStringSet()
@@ -298,7 +298,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourceString()
+     * @covers ::withSourceString()
      * @expectedException \InvalidArgumentException
      */
     public function testSourceStringExceptionPathSet()
@@ -309,7 +309,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourceString()
+     * @covers ::withSourceString()
      * @expectedException \InvalidArgumentException
      */
     public function testSourceStringExceptionStreamSet()
@@ -320,7 +320,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::withSourceString()
+     * @covers ::withSourceString()
      * @expectedException \InvalidArgumentException
      */
     public function testSourceStringExceptionStringSet()
@@ -331,7 +331,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::getSourceAsStream()
+     * @covers ::getSourceAsStream()
      */
     public function testGetSourceAsStreamFromPath()
     {
@@ -343,7 +343,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::getSourceAsStream()
+     * @covers ::getSourceAsStream()
      */
     public function testGetSourceAsStreamFromStream()
     {
@@ -355,7 +355,7 @@ final class ArchiveEntryTest extends TestCase
     }
 
     /**
-     * @covers \iqb\ArchiveEntry::getSourceAsStream()
+     * @covers ::getSourceAsStream()
      */
     public function testGetSourceAsStreamFromString()
     {

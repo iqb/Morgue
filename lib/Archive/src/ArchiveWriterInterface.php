@@ -8,7 +8,7 @@
  * Committer: $Format:%cn <%ce>, %ci$
  */
 
-namespace iqb;
+namespace morgue\archive;
 
 /**
  * @author Dennis Birkholz <dennis@birkholz.org>

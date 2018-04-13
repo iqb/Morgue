@@ -2,11 +2,11 @@
 
 namespace iqb\zip;
 
-use const iqb\COMPRESSION_METHOD_BZIP2;
-use const iqb\COMPRESSION_METHOD_DEFLATE;
-use const iqb\COMPRESSION_METHOD_DEFLATE64;
-use const iqb\COMPRESSION_METHOD_LZMA;
-use const iqb\COMPRESSION_METHOD_STORE;
+use const morgue\archive\COMPRESSION_METHOD_BZIP2;
+use const morgue\archive\COMPRESSION_METHOD_DEFLATE;
+use const morgue\archive\COMPRESSION_METHOD_DEFLATE64;
+use const morgue\archive\COMPRESSION_METHOD_LZMA;
+use const morgue\archive\COMPRESSION_METHOD_STORE;
 use iqb\ZipArchive;
 
 const MAX_INT_16 = 0xFFFF;

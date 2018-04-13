@@ -10,8 +10,8 @@
 
 namespace iqb\zip;
 
-use iqb\Archive;
-use iqb\ArchiveWriterInterface;
+use morgue\archive\Archive;
+use morgue\archive\ArchiveWriterInterface;
 
 /**
  * @author Dennis Birkholz <dennis@birkholz.org>

@@ -4,19 +4,16 @@
 	<testsuites>
 		<testsuite name="default">
 			<directory>tests/</directory>
-			<directory>lib/*/tests/</directory>
 		</testsuite>
 	</testsuites>
 
 	<filter>
 		<whitelist>
-			<directory suffix=".php">lib/*/src/</directory>
 			<directory suffix=".php">src/</directory>
 
 			<exclude>
-				<directory suffix="Interface.php">lib/*/src/</directory>
-				<file>lib/*/src/constants.php</file>
 				<directory suffix="Interface.php">src/</directory>
+				<file>src/constants.php</file>
 			</exclude>
 		</whitelist>
 	</filter>

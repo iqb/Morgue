@@ -8,12 +8,12 @@
  * Committer: $Format:%cn <%ce>, %ci$
  */
 
-namespace iqb;
+namespace morgue\archive;
 
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \iqb\Archive
+ * @coversDefaultClass \morgue\archive\Archive
  */
 final class ArchiveTest extends TestCase
 {
@@ -72,7 +72,7 @@ final class ArchiveTest extends TestCase
     }
 
     /**
-     * @covers \iqb\Archive::addEntry()
+     * @covers ::addEntry()
      */
     public function testAddEntry()
     {
@@ -103,7 +103,7 @@ final class ArchiveTest extends TestCase
     }
 
     /**
-     * @covers \iqb\Archive::delEntry()
+     * @covers  ::delEntry()
      */
     public function testDelEntry()
     {
@@ -147,7 +147,7 @@ final class ArchiveTest extends TestCase
     }
 
     /**
-     * @covers \iqb\Archive::getEntry()
+     * @covers ::getEntry()
      * @expectedException \InvalidArgumentException
      */
     public function testGetEntry()
@@ -157,7 +157,7 @@ final class ArchiveTest extends TestCase
     }
 
     /**
-     * @covers \iqb\Archive::replaceEntry()
+     * @covers ::replaceEntry()
      * @expectedException \InvalidArgumentException
      */
     public function testReplaceEntry()

@@ -2,7 +2,7 @@
 
 namespace iqb\zip;
 
-use iqb\ArchiveEntry;
+use morgue\archive\ArchiveEntry;
 
 final class LocalFileHeader
 {

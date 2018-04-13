@@ -2,7 +2,7 @@
 
 namespace iqb\zip;
 
-use iqb\ArchiveEntry;
+use morgue\archive\ArchiveEntry;
 
 /**
  * This class represents a "central directory header" data structure as defined in the ZIP specification.

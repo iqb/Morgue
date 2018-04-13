@@ -1,5 +1,5 @@
 {
-    "name": "iqb/zip",
+    "name": "morgue/morgue",
     "description": "ZipArchive replacement supporting PHP streams.",
     "authors": [
         {
@@ -10,12 +10,13 @@
     "license": "LGPL-3.0-or-later",
     "autoload": {
         "psr-4": {
+            "morgue\\archive\\": "lib/Archive/src/",
             "iqb\\stream\\": "lib/SubStream/src/",
             "iqb\\": "src/"
         },
         "files": [
+            "lib/Archive/src/constants.php",
             "lib/SubStream/src/register.php",
-            "src/constants.php",
             "src/zip/constants.php",
             "src/zip/functions.php"
         ]
