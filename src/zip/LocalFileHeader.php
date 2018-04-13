@@ -120,6 +120,32 @@ final class LocalFileHeader
     }
 
     /**
+     * Create the binary on disk representation
+     *
+     * @return string
+     */
+    public function marshal() : string
+    {
+        return \pack(
+                'NvvvvvVVVvv',
+                self::SIGNATURE,
+                $this->versionNeededToExtract,
+                $this->generalPurposeBitFlags,
+                $this->compressionMethod,
+                $this->lastModificationFileTime,
+                $this->lastModificationFileDate,
+                $this->crc32,
+                $this->compressedSize,
+                $this->uncompressedSize,
+                \strlen($this->fileName),
+                \strlen($this->extraField)
+            )
+            . $this->fileName
+            . $this->extraField
+            ;
+    }
+
+    /**
      * Parse the local file header from a binary string.
      * Check $requireAdditionalData to check if parseAdditionalData() must be called to parse additional fields.
      *

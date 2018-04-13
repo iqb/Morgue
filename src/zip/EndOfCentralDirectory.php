@@ -150,6 +150,28 @@ final class EndOfCentralDirectory
     }
 
     /**
+     * Create the binary on disk representation
+     *
+     * @return string
+     */
+    public function marshal() : string
+    {
+        return \pack(
+                'NvvvvVVv',
+                self::SIGNATURE,
+                $this->numberOfThisDisk,
+                $this->numberOfTheDiskWithTheStartOfTheCentralDirectory,
+                $this->totalNumberOfEntriesInTheCentralDirectoryOnThisDisk,
+                $this->totalNumberOfEntriesInTheCentralDirectory,
+                $this->sizeOfTheCentralDirectory,
+                $this->offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber,
+                \strlen($this->zipFileComment)
+            )
+            . $this->zipFileComment
+            ;
+    }
+
+    /**
      * The number of bytes the fields with variable length require.
      *
      * @return int

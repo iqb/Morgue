@@ -320,13 +320,46 @@ final class CentralDirectoryHeader
         $this->fileName = \substr($input, $offset, $this->fileNameLength);
         $offset += $this->fileNameLength;
         $extraField = \substr($input, $offset, $this->extraFieldLength);
-        $this->extraField = bin2hex($extraField);
+        $this->extraField = $extraField;
         $offset += $this->extraFieldLength;
         $this->extraFields = ExtraField::parseAll($extraField, $this);
         $this->fileComment = \substr($input, $offset, $this->fileCommentLength);
         $this->requireAdditionalData = false;
 
         return $variableLength;
+    }
+
+    /**
+     * Create the binary on disk representation
+     *
+     * @return string
+     */
+    public function marshal() : string
+    {
+        return \pack(
+                'NvvvvvvVVVvvvvvVV',
+                self::SIGNATURE,
+                $this->versionMadeBy,
+                $this->versionNeededToExtract,
+                $this->generalPurposeBitFlags,
+                $this->compressionMethod,
+                $this->lastModificationFileTime,
+                $this->lastModificationFileDate,
+                $this->crc32,
+                $this->compressedSize,
+                $this->uncompressedSize,
+                \strlen($this->fileName),
+                \strlen($this->extraField),
+                \strlen($this->fileComment),
+                $this->diskNumberStart,
+                $this->internalFileAttributes,
+                $this->externalFileAttributes,
+                $this->relativeOffsetOfLocalHeader
+            )
+            . $this->fileName
+            . $this->extraField
+            . $this->fileComment
+            ;
     }
 
     /**
